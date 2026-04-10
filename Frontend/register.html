@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="wooble_image/images.jpg">
+    <title>Jobs - register | Wooble</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .auth-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 16px;
+        }
+        .wb-auth-card { max-width: 480px; }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .role-option {
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .role-option:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .role-option.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .role-option .role-icon { font-size: 28px; margin-bottom: 6px; }
+        .role-option .role-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .role-option .role-desc {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="wb-navbar navbar">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html" style="margin-left: -50px;">
+    <img src="wooble_image/wooble_logo_blue_1.png" alt="Wooble Jobs" style="height:30px; width:auto;">
+</a>
+        <a href="login.html" class="btn-wb-outline">Sign In</a>
+    </div>
+</nav>
+
+<!-- Auth Wrapper -->
+<div class="auth-wrapper">
+    <div class="wb-auth-card">
+
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <div style="font-size:48px;margin-bottom:12px;">🚀</div>
+            <h2>Create Account</h2>
+            <p class="subtitle">Join Wooble Jobs and start your journey</p>
+        </div>
+
+        <!-- Alert -->
+        <div id="authAlert" class="wb-alert"></div>
+
+        <!-- Role Selector -->
+        <div class="wb-form-group">
+            <label>I am a...</label>
+            <div class="role-selector">
+                <div class="role-option selected" onclick="selectRole('candidate', this)">
+                    <div class="role-icon">👤</div>
+                    <div class="role-name">Candidate</div>
+                    <div class="role-desc">Looking for jobs</div>
+                </div>
+                <div class="role-option" onclick="selectRole('admin', this)">
+                    <div class="role-icon">🏢</div>
+                    <div class="role-name">Employer</div>
+                    <div class="role-desc">Hiring talent</div>
+                </div>
+            </div>
+            <input type="hidden" id="selectedRole" value="candidate">
+        </div>
+
+        <!-- Form -->
+        <form id="registerForm" onsubmit="handleRegister(event)">
+
+            <div class="wb-form-group">
+                <label>Full Name</label>
+                <input type="text" id="name" class="wb-form-control"
+                       placeholder="John Doe" required>
+            </div>
+
+            <div class="wb-form-group">
+                <label>Email Address</label>
+                <input type="email" id="email" class="wb-form-control"
+                       placeholder="your@email.com" required>
+            </div>
+
+            <div class="wb-form-group">
+                <label>Phone Number <span class="text-muted">(optional)</span></label>
+                <input type="tel" id="phone" class="wb-form-control"
+                       placeholder="9876543210">
+            </div>
+
+            <div class="wb-form-group">
+                <label>Password</label>
+                <div class="position-relative">
+                    <input type="password" id="password" class="wb-form-control"
+                           placeholder="Min 6 characters" required minlength="6">
+                    <button type="button"
+                            onclick="togglePassword('password', this)"
+                            style="position:absolute;right:14px;top:50%;transform:translateY(-50%);
+                                   background:none;border:none;color:var(--text-light);cursor:pointer;">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="wb-form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirmPassword" class="wb-form-control"
+                       placeholder="Re-enter password" required>
+            </div>
+
+            <!-- Password strength -->
+            <div id="passwordStrength" class="mb-3" style="display:none;">
+                <div style="height:4px;border-radius:2px;background:var(--border);overflow:hidden;">
+                    <div id="strengthBar" style="height:100%;width:0;transition:all 0.3s;border-radius:2px;"></div>
+                </div>
+                <span id="strengthLabel" style="font-size:12px;color:var(--text-light);"></span>
+            </div>
+
+            <button type="submit" class="btn-wb-primary w-100 py-3 mt-2" id="registerBtn">
+                Create Account
+            </button>
+
+        </form>
+
+        <p class="text-center mt-4 mb-0" style="font-size:14px;color:var(--text-light);">
+            Already have an account?
+            <a href="login.html" class="fw-600">Sign in</a>
+        </p>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+
+    let selectedRole = "candidate";
+
+    // Redirect if already logged in
+    document.addEventListener("DOMContentLoaded", () => {
+        if (Auth.isLoggedIn()) {
+            window.location.href = Auth.isAdmin()
+                ? "admin/dashboard.html"
+                : "candidate/dashboard.html";
+        }
+
+        // Password strength checker
+        document.getElementById("password").addEventListener("input", checkStrength);
+    });
+
+    // ── Select Role ───────────────────────
+    function selectRole(role, el) {
+        selectedRole = role;
+        document.getElementById("selectedRole").value = role;
+        document.querySelectorAll(".role-option").forEach(o => o.classList.remove("selected"));
+        el.classList.add("selected");
+    }
+
+    // ── Handle Register ───────────────────
+    async function handleRegister(e) {
+        e.preventDefault();
+
+        const name            = document.getElementById("name").value.trim();
+        const email           = document.getElementById("email").value.trim();
+        const phone           = document.getElementById("phone").value.trim();
+        const password        = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const btn             = document.getElementById("registerBtn");
+
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            showAlert("authAlert", "Passwords do not match", "danger");
+            return;
+        }
+
+        // Loading state
+        btn.innerHTML = '<span class="wb-spinner"></span> Creating account...';
+        btn.disabled  = true;
+
+        const { status, data } = await apiRequest("/auth/register", "POST", {
+            name, email, password, role: selectedRole, phone
+        });
+
+        btn.innerHTML = "Create Account";
+        btn.disabled  = false;
+
+        if (!data.success) {
+            showAlert("authAlert", data.message, "danger");
+            return;
+        }
+
+        // Save token & user
+        Auth.setToken(data.data.token);
+        Auth.setUser(data.data.user);
+
+        showAlert("authAlert", "Account created successfully! Redirecting...", "success");
+
+        setTimeout(() => {
+            if (Auth.isAdmin()) {
+                window.location.href = "admin/dashboard.html";
+            } else {
+                window.location.href = "candidate/dashboard.html";
+            }
+        }, 1200);
+    }
+
+    // ── Toggle Password ───────────────────
+    function togglePassword(id, btn) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type    = "text";
+            btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+        } else {
+            input.type    = "password";
+            btn.innerHTML = '<i class="bi bi-eye"></i>';
+        }
+    }
+
+    // ── Password Strength ─────────────────
+    function checkStrength() {
+        const val = document.getElementById("password").value;
+        const bar = document.getElementById("strengthBar");
+        const lbl = document.getElementById("strengthLabel");
+        const wrap = document.getElementById("passwordStrength");
+
+        if (!val) { wrap.style.display = "none"; return; }
+        wrap.style.display = "block";
+
+        let score = 0;
+        if (val.length >= 6)  score++;
+        if (val.length >= 10) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+
+        const levels = [
+            { w: "20%",  color: "#dc2626", label: "Very Weak" },
+            { w: "40%",  color: "#f97316", label: "Weak" },
+            { w: "60%",  color: "#eab308", label: "Fair" },
+            { w: "80%",  color: "#22c55e", label: "Strong" },
+            { w: "100%", color: "#16a34a", label: "Very Strong" }
+        ];
+
+        const level       = levels[Math.min(score, 4)];
+        bar.style.width   = level.w;
+        bar.style.background = level.color;
+        lbl.textContent   = level.label;
+        lbl.style.color   = level.color;
+    }
+
+</script>
+</body>
+</html>

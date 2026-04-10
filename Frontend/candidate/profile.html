@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
+    <title>Jobs - candidate | Wooble</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { background: var(--bg-light); }
+
+        .wb-sidebar {
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-user {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--primary-light);
+        }
+
+        .sidebar-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav { padding: 12px 0; flex: 1; }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 24px;
+            color: var(--text-mid);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .sidebar-nav a.active { font-weight: 700; }
+
+        .sidebar-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .wb-main { margin-left: 240px; min-height: 100vh; }
+
+        .wb-topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--white);
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 16px rgba(26,86,219,0.3);
+        }
+
+        .profile-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+
+        .profile-card h5 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-row .label {
+            width: 140px;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .info-row .value {
+            color: var(--text-dark);
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border);
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        @media(max-width:768px) {
+            .wb-sidebar { display: none; }
+            .wb-main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════ -->
+<div class="wb-sidebar">
+    <div class="sidebar-brand">
+        <a href="../index.html" style="text-decoration:none;">
+            <span style="font-size:18px;font-weight:800;color:var(--primary);">
+                 Wooble Jobs
+            </span>
+        </a>
+    </div>
+
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" id="sidebarAvatar">J</div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:var(--text-dark);"
+                     id="sidebarName">Loading...</div>
+                <div style="font-size:12px;color:var(--primary);font-weight:600;">
+                    Candidate
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="dashboard.html">
+            <i class="bi bi-grid"></i> Overview
+        </a>
+        <a href="dashboard.html#applications">
+            <i class="bi bi-file-text"></i> My Applications
+        </a>
+        <a href="profile.html" class="active">
+            <i class="bi bi-person"></i> My Profile
+        </a>
+        <a href="../index.html">
+            <i class="bi bi-briefcase"></i> Browse Jobs
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <button onclick="Auth.logout()"
+                class="btn-wb-outline w-100"
+                style="font-size:13px;padding:9px;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════ -->
+<div class="wb-main">
+
+    <!-- Topbar -->
+    <div class="wb-topbar">
+        <div>
+            <h5 style="margin:0;font-weight:700;">My Profile</h5>
+            <p class="text-muted mb-0" style="font-size:13px;">
+                Manage your personal information
+            </p>
+        </div>
+        <a href="../index.html" class="btn-wb-primary"
+           style="font-size:13px;padding:9px 18px;">
+            <i class="bi bi-briefcase"></i> Browse Jobs
+        </a>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:32px;">
+
+        <!-- Alert -->
+        <div id="pageAlert" class="wb-alert"></div>
+
+        <div class="row g-4">
+
+            <!-- Left: Profile Summary -->
+            <div class="col-lg-4">
+
+                <!-- Avatar Card -->
+                <div class="profile-card text-center">
+                    <div class="profile-avatar" id="profileAvatar">J</div>
+                    <h4 style="font-weight:800;margin-bottom:4px;"
+                        id="profileName">Loading...</h4>
+                    <p style="color:var(--text-light);font-size:14px;margin-bottom:16px;"
+                       id="profileEmail"></p>
+                    <span class="wb-badge wb-badge-blue">👤 Candidate</span>
+
+                    <div class="mt-4 pt-4" style="border-top:1px solid var(--border);">
+                        <div class="info-row">
+                            <span class="label">Phone</span>
+                            <span class="value" id="profilePhone">—</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Joined</span>
+                            <span class="value" id="profileJoined">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="profile-card">
+                    <h5>
+                        <i class="bi bi-bar-chart text-primary"></i>
+                        Application Stats
+                    </h5>
+                    <div class="row g-2" id="statsGrid">
+                        <div class="col-6">
+                            <div style="background:var(--bg-light);border-radius:var(--radius-sm);
+                                        padding:14px;text-align:center;">
+                                <div style="font-size:22px;font-weight:800;color:var(--primary);"
+                                     id="statTotal">—</div>
+                                <div style="font-size:11px;color:var(--text-light);font-weight:600;">
+                                    Total
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background:#fef9c3;border-radius:var(--radius-sm);
+                                        padding:14px;text-align:center;">
+                                <div style="font-size:22px;font-weight:800;color:#854d0e;"
+                                     id="statPending">—</div>
+                                <div style="font-size:11px;color:#854d0e;font-weight:600;">
+                                    Pending
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background:#dbeafe;border-radius:var(--radius-sm);
+                                        padding:14px;text-align:center;">
+                                <div style="font-size:22px;font-weight:800;color:#1d4ed8;"
+                                     id="statShortlisted">—</div>
+                                <div style="font-size:11px;color:#1d4ed8;font-weight:600;">
+                                    Shortlisted
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background:#dcfce7;border-radius:var(--radius-sm);
+                                        padding:14px;text-align:center;">
+                                <div style="font-size:22px;font-weight:800;color:#15803d;"
+                                     id="statInvited">—</div>
+                                <div style="font-size:11px;color:#15803d;font-weight:600;">
+                                    Invited
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right: Edit Forms -->
+            <div class="col-lg-8">
+
+                <!-- Edit Profile Form -->
+                <div class="profile-card">
+                    <h5>
+                        <i class="bi bi-person-gear text-primary"></i>
+                        Edit Personal Information
+                    </h5>
+
+                    <div id="profileAlert" class="wb-alert"></div>
+
+                    <form id="profileForm" onsubmit="handleUpdateProfile(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="wb-form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="editName"
+                                           class="wb-form-control"
+                                           placeholder="Your full name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="wb-form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" id="editEmail"
+                                           class="wb-form-control"
+                                           placeholder="your@email.com"
+                                           disabled
+                                           style="background:var(--bg-light);
+                                                  cursor:not-allowed;">
+                                    <small class="text-muted">
+                                        Email cannot be changed
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="wb-form-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" id="editPhone"
+                                           class="wb-form-control"
+                                           placeholder="9876543210">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="wb-form-group">
+                                    <label>Role</label>
+                                    <input type="text" class="wb-form-control"
+                                           value="Candidate" disabled
+                                           style="background:var(--bg-light);
+                                                  cursor:not-allowed;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-2">
+                            <button type="submit" class="btn-wb-primary px-5"
+                                    id="updateProfileBtn">
+                                <i class="bi bi-check-lg"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Change Password Form -->
+                <div class="profile-card">
+                    <h5>
+                        <i class="bi bi-shield-lock text-primary"></i>
+                        Change Password
+                    </h5>
+
+                    <div id="passwordAlert" class="wb-alert"></div>
+
+                    <form id="passwordForm" onsubmit="handleChangePassword(event)">
+                        <div class="row g-3">
+
+                            <div class="col-12">
+                                <div class="wb-form-group">
+                                    <label>Current Password</label>
+                                    <div class="position-relative">
+                                        <input type="password"
+                                               id="currentPassword"
+                                               class="wb-form-control"
+                                               placeholder="Enter current password"
+                                               required>
+                                        <button type="button"
+                                                onclick="togglePass('currentPassword', this)"
+                                                style="position:absolute;right:14px;top:50%;
+                                                       transform:translateY(-50%);background:none;
+                                                       border:none;color:var(--text-light);
+                                                       cursor:pointer;">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="wb-form-group">
+                                    <label>New Password</label>
+                                    <div class="position-relative">
+                                        <input type="password"
+                                               id="newPassword"
+                                               class="wb-form-control"
+                                               placeholder="Min 6 characters"
+                                               oninput="checkStrength(this.value)"
+                                               required>
+                                        <button type="button"
+                                                onclick="togglePass('newPassword', this)"
+                                                style="position:absolute;right:14px;top:50%;
+                                                       transform:translateY(-50%);background:none;
+                                                       border:none;color:var(--text-light);
+                                                       cursor:pointer;">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <!-- Strength Bar -->
+                                    <div id="strengthWrap" style="display:none;margin-top:8px;">
+                                        <div class="strength-bar">
+                                            <div class="strength-fill"
+                                                 id="strengthBar"
+                                                 style="width:0;"></div>
+                                        </div>
+                                        <span id="strengthLabel"
+                                              style="font-size:12px;
+                                                     color:var(--text-light);">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="wb-form-group">
+                                    <label>Confirm New Password</label>
+                                    <div class="position-relative">
+                                        <input type="password"
+                                               id="confirmPassword"
+                                               class="wb-form-control"
+                                               placeholder="Re-enter new password"
+                                               oninput="checkMatch()"
+                                               required>
+                                        <button type="button"
+                                                onclick="togglePass('confirmPassword', this)"
+                                                style="position:absolute;right:14px;top:50%;
+                                                       transform:translateY(-50%);background:none;
+                                                       border:none;color:var(--text-light);
+                                                       cursor:pointer;">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <span id="matchLabel"
+                                          style="font-size:12px;margin-top:4px;
+                                                 display:none;">
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Password Rules -->
+                        <div class="mb-4 p-3"
+                             style="background:var(--bg-light);
+                                    border-radius:var(--radius-sm);">
+                            <p style="font-size:12px;font-weight:700;
+                                      color:var(--text-light);margin-bottom:8px;">
+                                PASSWORD REQUIREMENTS
+                            </p>
+                            <div class="row g-1">
+                                <div class="col-6">
+                                    <span id="rule1"
+                                          style="font-size:12px;color:var(--text-light);">
+                                        ○ At least 6 characters
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span id="rule2"
+                                          style="font-size:12px;color:var(--text-light);">
+                                        ○ At least one number
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span id="rule3"
+                                          style="font-size:12px;color:var(--text-light);">
+                                        ○ At least one uppercase
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span id="rule4"
+                                          style="font-size:12px;color:var(--text-light);">
+                                        ○ At least one special char
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn-wb-primary px-5"
+                                    id="changePasswordBtn">
+                                <i class="bi bi-shield-check"></i> Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="profile-card"
+                     style="border-color:#fecaca;">
+                    <h5 style="color:var(--danger);border-bottom-color:#fee2e2;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Account Actions
+                    </h5>
+                    <div class="d-flex justify-content-between align-items-center
+                                flex-wrap gap-3">
+                        <div>
+                            <div style="font-size:14px;font-weight:700;">
+                                Sign out everywhere
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);">
+                                This will log you out of your current session
+                            </div>
+                        </div>
+                        <button onclick="Auth.logout()"
+                                class="btn-wb-danger">
+                            <i class="bi bi-box-arrow-left"></i> Logout
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script>
+
+    // ── On Load ───────────────────────────
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!requireAuth("candidate")) return;
+
+        const user = Auth.getUser();
+        document.getElementById("sidebarName").textContent   = user.name;
+        document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+
+        loadProfile();
+    });
+
+    // ── Load Profile ──────────────────────
+    async function loadProfile() {
+    // First fill from localStorage while API loads
+    const cachedUser = Auth.getUser();
+    if (cachedUser) {
+        document.getElementById("profileAvatar").textContent = cachedUser.name.charAt(0).toUpperCase();
+        document.getElementById("profileName").textContent   = cachedUser.name;
+        document.getElementById("profileEmail").textContent  = cachedUser.email;
+        document.getElementById("editName").value            = cachedUser.name;
+        document.getElementById("editEmail").value           = cachedUser.email;
+        document.getElementById("sidebarName").textContent   = cachedUser.name;
+        document.getElementById("sidebarAvatar").textContent = cachedUser.name.charAt(0).toUpperCase();
+    }
+
+    const { data } = await apiRequest("/user/profile", "GET", null, true);
+
+    if (!data.success) {
+        showAlert("pageAlert", "Failed to load profile: " + data.message, "danger");
+        return;
+    }
+
+        const { profile, stats } = data.data;
+
+        // Avatar & header
+        document.getElementById("profileAvatar").textContent = profile.avatar;
+        document.getElementById("profileName").textContent   = profile.name;
+        document.getElementById("profileEmail").textContent  = profile.email;
+        document.getElementById("profilePhone").textContent  = profile.phone || "Not set";
+        document.getElementById("profileJoined").textContent = formatDate(profile.joined);
+
+        // Fill edit form
+        document.getElementById("editName").value  = profile.name;
+        document.getElementById("editEmail").value = profile.email;
+        document.getElementById("editPhone").value = profile.phone || "";
+
+        // Stats
+        if (stats) {
+            document.getElementById("statTotal").textContent       = stats.total       || 0;
+            document.getElementById("statPending").textContent     = stats.pending     || 0;
+            document.getElementById("statShortlisted").textContent = stats.shortlisted || 0;
+            document.getElementById("statInvited").textContent     = stats.invited     || 0;
+        }
+    }
+
+    // ── Handle Update Profile ─────────────
+    async function handleUpdateProfile(e) {
+        e.preventDefault();
+
+        const name  = document.getElementById("editName").value.trim();
+        const phone = document.getElementById("editPhone").value.trim();
+        const btn   = document.getElementById("updateProfileBtn");
+
+        if (!name) {
+            showAlert("profileAlert", "Name is required", "danger");
+            return;
+        }
+
+        btn.innerHTML = '<span class="wb-spinner"></span> Saving...';
+        btn.disabled  = true;
+
+        const { data } = await apiRequest(
+            "/user/update-profile",
+            "PUT",
+            { name, phone },
+            true
+        );
+
+        btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Changes';
+        btn.disabled  = false;
+
+        if (!data.success) {
+            showAlert("profileAlert", data.message, "danger");
+            return;
+        }
+
+        // Update sidebar & local storage
+        const user    = Auth.getUser();
+        user.name     = data.data.profile.name;
+        Auth.setUser(user);
+
+        document.getElementById("sidebarName").textContent   = data.data.profile.name;
+        document.getElementById("sidebarAvatar").textContent = data.data.profile.avatar;
+        document.getElementById("profileAvatar").textContent = data.data.profile.avatar;
+        document.getElementById("profileName").textContent   = data.data.profile.name;
+        document.getElementById("profilePhone").textContent  = data.data.profile.phone || "Not set";
+
+        showAlert("profileAlert", "Profile updated successfully! ✅", "success");
+    }
+
+    // ── Handle Change Password ────────────
+    async function handleChangePassword(e) {
+        e.preventDefault();
+
+        const currentPassword = document.getElementById("currentPassword").value;
+        const newPassword     = document.getElementById("newPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const btn             = document.getElementById("changePasswordBtn");
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            showAlert("passwordAlert", "All password fields are required", "danger");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showAlert("passwordAlert", "New password must be at least 6 characters", "danger");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showAlert("passwordAlert", "New passwords do not match", "danger");
+            return;
+        }
+
+        btn.innerHTML = '<span class="wb-spinner"></span> Updating...';
+        btn.disabled  = true;
+
+        const { data } = await apiRequest(
+            "/user/update-profile",
+            "PUT",
+            {
+                current_password: currentPassword,
+                new_password:     newPassword,
+                confirm_password: confirmPassword
+            },
+            true
+        );
+
+        btn.innerHTML = '<i class="bi bi-shield-check"></i> Change Password';
+        btn.disabled  = false;
+
+        if (!data.success) {
+            showAlert("passwordAlert", data.message, "danger");
+            return;
+        }
+
+        // Clear password fields
+        document.getElementById("passwordForm").reset();
+        document.getElementById("strengthWrap").style.display = "none";
+        document.getElementById("matchLabel").style.display   = "none";
+        resetRules();
+
+        showAlert("passwordAlert", "Password changed successfully! ✅", "success");
+    }
+
+    // ── Toggle Password Visibility ────────
+    function togglePass(id, btn) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type    = "text";
+            btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+        } else {
+            input.type    = "password";
+            btn.innerHTML = '<i class="bi bi-eye"></i>';
+        }
+    }
+
+    // ── Password Strength ─────────────────
+    function checkStrength(val) {
+        const wrap  = document.getElementById("strengthWrap");
+        const bar   = document.getElementById("strengthBar");
+        const label = document.getElementById("strengthLabel");
+
+        if (!val) { wrap.style.display = "none"; return; }
+        wrap.style.display = "block";
+
+        let score = 0;
+        if (val.length >= 6)            score++;
+        if (val.length >= 10)           score++;
+        if (/[A-Z]/.test(val))         score++;
+        if (/[0-9]/.test(val))         score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+
+        const levels = [
+            { w: "20%",  color: "#dc2626", label: "Very Weak" },
+            { w: "40%",  color: "#f97316", label: "Weak" },
+            { w: "60%",  color: "#eab308", label: "Fair" },
+            { w: "80%",  color: "#22c55e", label: "Strong" },
+            { w: "100%", color: "#16a34a", label: "Very Strong" }
+        ];
+
+        const level          = levels[Math.min(score, 4)];
+        bar.style.width      = level.w;
+        bar.style.background = level.color;
+        label.textContent    = level.label;
+        label.style.color    = level.color;
+
+        // Update rules
+        updateRule("rule1", val.length >= 6);
+        updateRule("rule2", /[0-9]/.test(val));
+        updateRule("rule3", /[A-Z]/.test(val));
+        updateRule("rule4", /[^A-Za-z0-9]/.test(val));
+
+        // Check match
+        checkMatch();
+    }
+
+    // ── Update Rule Indicator ─────────────
+    function updateRule(id, passed) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (passed) {
+            el.style.color   = "var(--success)";
+            el.textContent   = el.textContent.replace("○", "✓");
+        } else {
+            el.style.color   = "var(--text-light)";
+            el.textContent   = el.textContent.replace("✓", "○");
+        }
+    }
+
+    // ── Reset Rules ───────────────────────
+    function resetRules() {
+        ["rule1","rule2","rule3","rule4"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.color  = "var(--text-light)";
+                el.textContent  = el.textContent.replace("✓", "○");
+            }
+        });
+    }
+
+    // ── Check Password Match ──────────────
+    function checkMatch() {
+        const newPass     = document.getElementById("newPassword").value;
+        const confirmPass = document.getElementById("confirmPassword").value;
+        const label       = document.getElementById("matchLabel");
+
+        if (!confirmPass) { label.style.display = "none"; return; }
+
+        label.style.display = "block";
+
+        if (newPass === confirmPass) {
+            label.textContent  = "✓ Passwords match";
+            label.style.color  = "var(--success)";
+        } else {
+            label.textContent  = "✗ Passwords do not match";
+            label.style.color  = "var(--danger)";
+        }
+    }
+
+</script>
+<div class="wb-mobile-nav">
+    <a href="dashboard.html">
+        <i class="bi bi-grid"></i> Overview
+    </a>
+    <a href="dashboard.html#applications">
+        <i class="bi bi-file-text"></i> Applications
+    </a>
+    <a href="profile.html" class="active">
+        <i class="bi bi-person"></i> Profile
+    </a>
+    <a href="../index.html">
+        <i class="bi bi-briefcase"></i> Jobs
+    </a>
+</div>
+</body>
+</html>

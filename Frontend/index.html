@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="wooble_image/images.jpg">
+    <title>Jobs - Proof of Work Platform for Careers | Wooble</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════ -->
+<nav class="wb-navbar navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html" style="margin-left: -30px; margin-top: -8px;">
+            <img src="wooble_image/wooble_logo_blue_1.png" alt="Wooble Jobs" style="height:35px; width:auto;">
+            <span class="d-lg-none nav-link active" style="font-size:15px;color:var(--primary);font-weight:600; margin-top: 18px;">
+               <i class="bi bi-briefcase"></i>Jobs
+    </span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="margin-left:12px;">
+           <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav me-auto gap-1">
+                <li class="nav-item d-none d-lg-block">
+                    <a class="nav-link active" href="index.html">
+                        <i class="bi bi-briefcase"></i> Jobs
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Guest Nav -->
+            <!-- Guest Nav -->
+<div id="guestNav" class="d-flex gap-2 align-items-center" style="display:none; margin-right: -120px;">
+    <a href="login.html" class="btn-wb-outline">Sign In</a>
+    <a href="register.html" class="btn-wb-primary">Get Started</a>
+</div>
+
+<!-- User Nav -->
+<div id="userNav" class="d-flex gap-2 align-items-center" style="display:none; margin-right: -80px;" >
+    <span class="navbar-greeting">Hi, <span id="navUserName"></span> 👋</span>
+    <a href="#" id="dashboardLink" class="btn-wb-outline" style="font-size:16px;padding:8px 18px;">Dashboard</a>
+    <button onclick="Auth.logout()" class="btn-wb-outline" style="font-size:16px;padding:8px 18px;">Sign Out</button>
+</div>
+        </div>
+    </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section class="wb-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1>Find Jobs That<br><span>Match Your Skills</span></h1>
+                <p>Browse hundreds of opportunities from top companies. Apply with one click and track your applications in real time.</p>
+
+                <!-- Search Bar -->
+                <div class="wb-search-bar mb-4">
+                    <i class="bi bi-search text-muted"></i>
+                    <input type="text" id="searchInput" placeholder="Search jobs, companies, keywords...">
+                    <button class="btn-wb-primary px-4" onclick="searchJobs()">Search</button>
+                </div>
+
+                <!-- Quick Filters -->
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="wb-badge wb-badge-blue" style="cursor:pointer" onclick="filterByType('full-time')">Full Time</span>
+                    <span class="wb-badge wb-badge-green" style="cursor:pointer" onclick="filterByType('remote')">Remote</span>
+                    <span class="wb-badge wb-badge-yellow" style="cursor:pointer" onclick="filterByType('part-time')">Part Time</span>
+                    <span class="wb-badge wb-badge-purple" style="cursor:pointer" onclick="filterByType('contract')">Contract</span>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block text-center">
+                <div style="font-size:140px;line-height:1;opacity:0.15;">💼</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     STATS BAR
+══════════════════════════════════════════ -->
+<div class="wb-stats-bar">
+    <div class="container">
+        <div class="d-flex justify-content-center flex-wrap">
+            <div class="wb-stat-item">
+                <div class="number" id="statJobs">—</div>
+                <div class="label">Active Jobs</div>
+            </div>
+            <div class="wb-stat-item">
+                <div class="number" id="statCompanies">—</div>
+                <div class="label">Companies</div>
+            </div>
+            <div class="wb-stat-item">
+                <div class="number" id="statRemote">—</div>
+                <div class="label">Remote Jobs</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JOB LISTINGS
+══════════════════════════════════════════ -->
+<section class="wb-section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="wb-filter-bar flex-column d-flex gap-3">
+                    <h6 class="fw-700 mb-0" style="font-weight:700;">
+                        <i class="bi bi-funnel"></i> Filter Jobs
+                    </h6>
+                    <div>
+                        <label class="small fw-600 text-muted mb-1">Job Type</label>
+                        <select id="filterType" class="form-select" onchange="loadJobs()">
+                            <option value="">All Types</option>
+                            <option value="full-time">Full Time</option>
+                            <option value="part-time">Part Time</option>
+                            <option value="remote">Remote</option>
+                            <option value="contract">Contract</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="small fw-600 text-muted mb-1">Location</label>
+                        <input type="text" id="filterLocation" class="form-control"
+                               placeholder="e.g. Bhubaneswar"
+                               onkeyup="debounceLoad()">
+                    </div>
+                    <button class="btn-wb-outline w-100" onclick="clearFilters()">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Job Cards -->
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="wb-section-title mb-0">Latest Jobs</h4>
+                        <p class="wb-section-sub mb-0" id="jobCount">Loading...</p>
+                    </div>
+                    <select id="sortOrder" class="form-select w-auto" onchange="loadJobs()">
+                        <option value="latest">Latest First</option>
+                    </select>
+                </div>
+
+                <!-- Alert -->
+                <div id="pageAlert" class="wb-alert"></div>
+
+                <!-- Jobs Grid -->
+                <div id="jobsGrid">
+                    <!-- Skeleton loaders -->
+                    <div class="row g-3" id="skeletonLoader">
+                        ${Array(6).fill(`
+                        <div class="col-md-6">
+                            <div class="wb-job-card">
+                                <div class="d-flex gap-3 align-items-start">
+                                    <div class="company-logo" style="background:#f3f4f6;"></div>
+                                    <div class="flex-grow-1">
+                                        <div style="height:16px;background:#f3f4f6;border-radius:4px;width:60%;margin-bottom:8px;"></div>
+                                        <div style="height:12px;background:#f3f4f6;border-radius:4px;width:40%;"></div>
+                                    </div>
+                                </div>
+                                <div class="job-meta">
+                                    <div style="height:24px;background:#f3f4f6;border-radius:50px;width:80px;"></div>
+                                    <div style="height:24px;background:#f3f4f6;border-radius:50px;width:60px;"></div>
+                                </div>
+                            </div>
+                        </div>`).join('')}
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="wb-pagination" id="pagination"></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer class="wb-footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="footer-brand mb-3">
+                    <link rel="icon" type="image/jpeg" href="wooble_image/images.jpg">
+                    <span>Wooble Jobs</span>
+                </div>
+                <p style="font-size:14px;color:#94a3b8;line-height:1.7;">
+                    Connecting talented professionals with top companies. Find your dream job today.
+                </p>
+            </div>
+            <div class="col-lg-2 col-6">
+    <h6>For Candidates</h6>
+    <ul>
+        <li><a href="index.html">Browse Jobs</a></li>
+        <li><a href="#" onclick="window.location.href = Auth.isLoggedIn() ? (Auth.isAdmin() ? 'admin/dashboard.html' : 'candidate/dashboard.html') : 'register.html'">Create Account</a></li>
+        <li><a href="#" onclick="window.location.href = Auth.isLoggedIn() ? 'candidate/dashboard.html#applications' : 'login.html'">My Applications</a></li>
+    </ul>
+</div>
+<div class="col-lg-2 col-6">
+    <h6>For Employers</h6>
+    <ul>
+        <li><a href="#" onclick="
+    if(Auth.isLoggedIn() && !Auth.isAdmin()) {
+        alert('This section is for employers only.');
+    } else {
+        window.location.href = Auth.isLoggedIn() ? 'admin/dashboard.html' : 'register.html';
+    }
+">Post a Job</a></li>
+
+<li><a href="#" onclick="
+    if(Auth.isLoggedIn() && !Auth.isAdmin()) {
+        alert('This section is for employers only.');
+    } else {
+        window.location.href = Auth.isLoggedIn() ? 'admin/dashboard.html' : 'login.html';
+    }
+">Admin Panel</a></li>
+    </ul>
+</div>
+            <div class="col-lg-4">
+                <h6>Stay Updated</h6>
+                <p style="font-size:13px;color:#94a3b8;">Get the latest job alerts directly to your inbox.</p>
+                <div class="d-flex gap-2">
+                    <input type="email" class="wb-form-control" placeholder="your@email.com"
+                           style="background:#1e3a5f;border-color:#334155;color:#fff;">
+                    <button class="btn-wb-primary">Subscribe</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span>© 2025 Wooble Jobs. All rights reserved.</span>
+        </div>
+    </div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/jobs.js"></script>
+<script>
+     currentPage   = 1;
+     debounceTimer = null;
+
+    // ── On Load ───────────────────────────
+    document.addEventListener("DOMContentLoaded", () => {
+        loadJobs();
+        setupDashboardLink();
+    });
+
+    // ── Dashboard Link ────────────────────
+    function setupDashboardLink() {
+        const link = document.getElementById("dashboardLink");
+        if (!link) return;
+        if (Auth.isAdmin()) {
+            link.href = "admin/dashboard.html";
+        } else {
+            link.href = "candidate/dashboard.html";
+        }
+    }
+
+    // ── Load Jobs ─────────────────────────
+    async function loadJobs(page = 1) {
+        currentPage = page;
+
+        const search   = document.getElementById("searchInput")?.value.trim() || "";
+        const type     = document.getElementById("filterType")?.value || "";
+        const location = document.getElementById("filterLocation")?.value.trim() || "";
+
+        let query = `?page=${page}`;
+        if (search)   query += `&search=${encodeURIComponent(search)}`;
+        if (type)     query += `&type=${type}`;
+        if (location) query += `&location=${encodeURIComponent(location)}`;
+
+        const { data } = await apiRequest(`/jobs${query}`);
+
+        if (!data.success) {
+            document.getElementById("jobsGrid").innerHTML = `
+                <div class="wb-empty-state">
+                    <div class="icon">😕</div>
+                    <h5>Failed to load jobs</h5>
+                    <p>${data.message}</p>
+                </div>`;
+            return;
+        }
+
+        const { jobs, total, total_pages } = data.data;
+
+        // Update stats
+        document.getElementById("statJobs").textContent     = total || 0;
+        document.getElementById("statCompanies").textContent = [...new Set(jobs.map(j => j.company))].length;
+        document.getElementById("statRemote").textContent   = jobs.filter(j => j.job_type === "remote").length;
+        document.getElementById("jobCount").textContent     = `${total} job${total !== 1 ? "s" : ""} found`;
+
+        if (jobs.length === 0) {
+            document.getElementById("jobsGrid").innerHTML = `
+                <div class="wb-empty-state">
+                    <div class="icon">🔍</div>
+                    <h5>No jobs found</h5>
+                    <p>Try different keywords or clear filters</p>
+                    <button class="btn-wb-outline mt-3" onclick="clearFilters()">Clear Filters</button>
+                </div>`;
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+
+        // Render job cards
+        document.getElementById("jobsGrid").innerHTML = `
+            <div class="row g-3">
+                ${jobs.map(job => `
+                <div class="col-md-6">
+                    <div class="wb-job-card" onclick="window.location='job-detail.html?id=${job.id}'">
+                        <div class="d-flex gap-3 align-items-start mb-3">
+                            <div class="company-logo">
+                                ${job.company.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="job-title">${job.title}</div>
+                                <div class="company-name">
+                                    <i class="bi bi-building"></i> ${job.company}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="job-meta">
+                            ${jobTypeBadge(job.job_type)}
+                            <span class="wb-badge wb-badge-gray">
+                                <i class="bi bi-geo-alt"></i> ${job.location}
+                            </span>
+                            ${job.salary_min ? `
+                            <span class="wb-badge wb-badge-green">
+                                ${formatSalary(job.salary_min, job.salary_max)}
+                            </span>` : ""}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3"
+                             style="border-top:1px solid var(--border)">
+                            <span class="text-muted" style="font-size:12px;">
+                                <i class="bi bi-clock"></i> ${formatDate(job.created_at)}
+                            </span>
+                            <span class="text-primary fw-600" style="font-size:13px;">
+                                View Job →
+                            </span>
+                        </div>
+                    </div>
+                </div>`).join("")}
+            </div>`;
+
+        // Render pagination
+        renderPagination(total_pages, page);
+    }
+
+    // ── Pagination ────────────────────────
+    function renderPagination(totalPages, current) {
+        if (totalPages <= 1) {
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+        let html = "";
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="wb-page-btn ${i === current ? "active" : ""}"
+                             onclick="loadJobs(${i})">${i}</button>`;
+        }
+        document.getElementById("pagination").innerHTML = html;
+    }
+
+    // ── Search ────────────────────────────
+    function searchJobs() { loadJobs(1); }
+
+    // ── Filter by type (quick badge click) ──
+    function filterByType(type) {
+        document.getElementById("filterType").value = type;
+        loadJobs(1);
+    }
+
+    // ── Clear Filters ─────────────────────
+    function clearFilters() {
+        document.getElementById("searchInput").value    = "";
+        document.getElementById("filterType").value     = "";
+        document.getElementById("filterLocation").value = "";
+        loadJobs(1);
+    }
+
+    // ── Debounce for location input ───────
+    function debounceLoad() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => loadJobs(1), 500);
+    }
+
+    // ── Search on Enter key ───────────────
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("searchInput")?.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") searchJobs();
+        });
+    });
+</script>
+</body>
+</html>

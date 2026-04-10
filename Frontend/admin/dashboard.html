@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
+    <title>Jobs - Admin | Wooble</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { background: var(--bg-light); }
+
+        .wb-sidebar {
+            background: var(--navy);
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav { padding: 12px 0; flex: 1; }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08);
+            color: var(--white);
+            border-right: 3px solid var(--accent);
+        }
+
+        .sidebar-nav a.active {
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .sidebar-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .wb-main { margin-left: 240px; min-height: 100vh; }
+
+        .wb-topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 120px;
+            padding: 0 8px;
+        }
+
+        .chart-bar-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .chart-bar-fill {
+            width: 100%;
+            background: var(--primary);
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            transition: height 0.5s ease;
+            position: relative;
+        }
+
+        .chart-bar-fill:hover {
+            background: var(--primary-dark);
+        }
+
+        .chart-bar-label {
+            font-size: 10px;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .chart-bar-value {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .recent-app-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .recent-app-row:last-child { border-bottom: none; }
+
+        @media(max-width:768px) {
+            .wb-sidebar { display: none; }
+            .wb-main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════ -->
+<div class="wb-sidebar">
+
+    <!-- Brand -->
+    <div class="sidebar-brand">
+        <a href="../index.html" style="text-decoration:none;">
+            <span style="font-size:18px;font-weight:800;color:var(--white);">Wooble Jobs</span>
+        </a>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">Admin Panel</div>
+    </div>
+
+    <!-- User Info -->
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" id="sidebarAvatar">A</div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:var(--white);"
+                     id="sidebarName">Loading...</div>
+                <div style="font-size:12px;color:#64748b;">Administrator</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+        <a href="dashboard.html" class="active">
+            <i class="bi bi-grid"></i> Dashboard
+        </a>
+        <a href="jobs.html">
+            <i class="bi bi-briefcase"></i> Manage Jobs
+        </a>
+        <a href="applications.html">
+            <i class="bi bi-file-text"></i> Applications
+        </a>
+        <a href="../index.html">
+            <i class="bi bi-eye"></i> View Site
+        </a>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+        <button onclick="Auth.logout()"
+                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+                       color:#94a3b8;border-radius:var(--radius-pill);padding:9px 16px;
+                       font-size:13px;width:100%;cursor:pointer;transition:all 0.2s;"
+                onmouseover="this.style.color='white'"
+                onmouseout="this.style.color='#94a3b8'">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════ -->
+<div class="wb-main">
+
+    <!-- Topbar -->
+    <div class="wb-topbar">
+        <div>
+            <h5 style="margin:0;font-weight:700;">Dashboard</h5>
+            <p class="text-muted mb-0" style="font-size:13px;">
+                Welcome back, <span id="topbarName"></span>!
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="jobs.html?action=new" class="btn-wb-primary" style="font-size:13px;padding:9px 18px;">
+               <i class="bi bi-plus"></i> Post New Job
+            </a>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:32px;">
+
+        <!-- Alert -->
+        <div id="pageAlert" class="wb-alert"></div>
+
+        <!-- ── OVERVIEW STATS ──────────────── -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-blue">💼</div>
+                    <div>
+                        <div class="stat-number" id="statTotalJobs">—</div>
+                        <div class="stat-label">Total Jobs</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-green">✅</div>
+                    <div>
+                        <div class="stat-number" id="statActiveJobs">—</div>
+                        <div class="stat-label">Active Jobs</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-yellow">📋</div>
+                    <div>
+                        <div class="stat-number" id="statTotalApps">—</div>
+                        <div class="stat-label">Total Applications</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-purple">👥</div>
+                    <div>
+                        <div class="stat-number" id="statCandidates">—</div>
+                        <div class="stat-label">Candidates</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── SECOND ROW STATS ───────────── -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-yellow">🕐</div>
+                    <div>
+                        <div class="stat-number" id="statPending">—</div>
+                        <div class="stat-label">Pending Review</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-blue">⭐</div>
+                    <div>
+                        <div class="stat-number" id="statShortlisted">—</div>
+                        <div class="stat-label">Shortlisted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-green">📅</div>
+                    <div>
+                        <div class="stat-number" id="statInvited">—</div>
+                        <div class="stat-label">Invited</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-red">❌</div>
+                    <div>
+                        <div class="stat-number" id="statRejected">—</div>
+                        <div class="stat-label">Rejected</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── CHARTS & TABLES ROW ────────── -->
+        <div class="row g-4 mb-4">
+
+            <!-- Daily Applications Chart -->
+            <div class="col-lg-6">
+                <div class="wb-stat-card flex-column align-items-start">
+                    <div class="d-flex justify-content-between w-100 mb-4">
+                        <div>
+                            <h6 style="font-weight:700;margin:0;">Applications This Week</h6>
+                            <p style="font-size:12px;color:var(--text-light);margin:0;">Daily application count</p>
+                        </div>
+                        <span class="wb-badge wb-badge-blue">Last 7 Days</span>
+                    </div>
+                    <div class="chart-bar w-100" id="dailyChart">
+                        <div class="text-center w-100 text-muted" style="font-size:13px;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Status Donut -->
+            <div class="col-lg-6">
+                <div class="wb-stat-card flex-column align-items-start">
+                    <div class="mb-4">
+                        <h6 style="font-weight:700;margin:0;">Application Status Overview</h6>
+                        <p style="font-size:12px;color:var(--text-light);margin:0;">Distribution by status</p>
+                    </div>
+                    <div id="statusChart" class="w-100">
+                        <div class="text-center text-muted" style="font-size:13px;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── BOTTOM ROW ─────────────────── -->
+        <div class="row g-4">
+
+            <!-- Recent Applications -->
+            <div class="col-lg-7">
+                <div class="wb-stat-card flex-column align-items-start">
+                    <div class="d-flex justify-content-between w-100 mb-3">
+                        <h6 style="font-weight:700;margin:0;">Recent Applications</h6>
+                        <a href="applications.html"
+                           style="font-size:13px;font-weight:600;">View All →</a>
+                    </div>
+                    <div id="recentApps" class="w-100">
+                        <div class="text-center py-4 text-muted">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Jobs -->
+            <div class="col-lg-5">
+                <div class="wb-stat-card flex-column align-items-start">
+                    <div class="d-flex justify-content-between w-100 mb-3">
+                        <h6 style="font-weight:700;margin:0;">Top Jobs</h6>
+                        <a href="jobs.html"
+                           style="font-size:13px;font-weight:600;">Manage →</a>
+                    </div>
+                    <div id="topJobs" class="w-100">
+                        <div class="text-center py-4 text-muted">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/applications.js"></script>
+<script>
+
+    // ── On Load ───────────────────────────
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!requireAuth("admin")) return;
+
+        const user = Auth.getUser();
+        document.getElementById("sidebarName").textContent   = user.name;
+        document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+        document.getElementById("topbarName").textContent    = user.name;
+
+        loadDashboard();
+    });
+
+    // ── Load Dashboard ────────────────────
+    async function loadDashboard() {
+        const { data } = await apiRequest("/admin/dashboard", "GET", null, true);
+
+        if (!data.success) {
+            showAlert("pageAlert", "Failed to load dashboard: " + data.message, "danger");
+            return;
+        }
+
+        const d = data.data;
+
+        // ── Overview Stats ────────────────
+        document.getElementById("statTotalJobs").textContent  = d.overview.total_jobs;
+        document.getElementById("statActiveJobs").textContent = d.overview.active_jobs;
+        document.getElementById("statTotalApps").textContent  = d.overview.total_applications;
+        document.getElementById("statCandidates").textContent = d.overview.total_candidates;
+        document.getElementById("statPending").textContent    = d.application_stats.pending;
+        document.getElementById("statShortlisted").textContent= d.application_stats.shortlisted;
+        document.getElementById("statInvited").textContent    = d.application_stats.invited;
+        document.getElementById("statRejected").textContent   = d.application_stats.rejected;
+
+        // ── Daily Chart ───────────────────
+        renderDailyChart(d.daily_stats);
+
+        // ── Status Chart ──────────────────
+        renderStatusChart(d.application_stats);
+
+        // ── Recent Applications ───────────
+        renderRecentApps(d.recent_applications);
+
+        // ── Top Jobs ──────────────────────
+        renderTopJobs(d.top_jobs);
+    }
+
+    // ── Daily Chart ───────────────────────
+    function renderDailyChart(dailyStats) {
+        if (!dailyStats || dailyStats.length === 0) {
+            document.getElementById("dailyChart").innerHTML =
+                `<div class="wb-empty-state" style="padding:20px;">
+                    <div class="icon" style="font-size:32px;">📊</div>
+                    <h5 style="font-size:14px;">No data yet</h5>
+                </div>`;
+            return;
+        }
+
+        const max = Math.max(...dailyStats.map(d => d.count), 1);
+
+        document.getElementById("dailyChart").innerHTML = `
+            <div class="chart-bar w-100">
+                ${dailyStats.map(d => {
+                    const pct  = Math.round((d.count / max) * 100);
+                    const date = new Date(d.date).toLocaleDateString("en-IN", { weekday: "short" });
+                    return `
+                    <div class="chart-bar-item">
+                        <div class="chart-bar-value">${d.count}</div>
+                        <div class="chart-bar-fill" style="height:${Math.max(pct, 4)}%;"
+                             title="${d.date}: ${d.count} applications"></div>
+                        <div class="chart-bar-label">${date}</div>
+                    </div>`;
+                }).join("")}
+            </div>`;
+    }
+
+    // ── Status Chart ──────────────────────
+    function renderStatusChart(stats) {
+        const total = (stats.pending || 0) + (stats.shortlisted || 0) +
+                      (stats.invited || 0) + (stats.rejected || 0);
+
+        if (total === 0) {
+            document.getElementById("statusChart").innerHTML =
+                `<div class="wb-empty-state" style="padding:20px;">
+                    <div class="icon" style="font-size:32px;">📋</div>
+                    <h5 style="font-size:14px;">No applications yet</h5>
+                </div>`;
+            return;
+        }
+
+        const items = [
+            { label: "Pending",     value: stats.pending     || 0, color: "#eab308", icon: "🕐" },
+            { label: "Shortlisted", value: stats.shortlisted || 0, color: "#3b82f6", icon: "⭐" },
+            { label: "Invited",     value: stats.invited     || 0, color: "#22c55e", icon: "📅" },
+            { label: "Rejected",    value: stats.rejected    || 0, color: "#ef4444", icon: "❌" }
+        ];
+
+        document.getElementById("statusChart").innerHTML = items.map(item => {
+            const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+            return `
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span style="font-size:13px;font-weight:600;">
+                        ${item.icon} ${item.label}
+                    </span>
+                    <span style="font-size:13px;font-weight:700;color:var(--text-dark);">
+                        ${item.value} <span style="color:var(--text-light);font-weight:400;">(${pct}%)</span>
+                    </span>
+                </div>
+                <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+                    <div style="height:100%;width:${pct}%;background:${item.color};
+                                border-radius:4px;transition:width 0.5s ease;"></div>
+                </div>
+            </div>`;
+        }).join("");
+    }
+
+    // ── Recent Applications ───────────────
+    function renderRecentApps(apps) {
+        if (!apps || apps.length === 0) {
+            document.getElementById("recentApps").innerHTML =
+                `<div class="wb-empty-state" style="padding:20px;">
+                    <div class="icon" style="font-size:32px;">📋</div>
+                    <h5 style="font-size:14px;">No applications yet</h5>
+                </div>`;
+            return;
+        }
+
+        document.getElementById("recentApps").innerHTML = apps.map(app => `
+            <div class="recent-app-row">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:36px;height:36px;background:var(--primary-light);
+                                border-radius:50%;display:flex;align-items:center;
+                                justify-content:center;font-weight:700;color:var(--primary);
+                                font-size:14px;flex-shrink:0;">
+                        ${app.candidate_name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <div style="font-size:14px;font-weight:700;">${app.candidate_name}</div>
+                        <div style="font-size:12px;color:var(--text-light);">
+                            ${app.job_title} · ${formatDate(app.applied_at)}
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    ${statusBadge(app.status)}
+                    <a href="applications.html"
+                       style="font-size:12px;color:var(--primary);font-weight:600;">
+                        Review →
+                    </a>
+                </div>
+            </div>`).join("");
+    }
+
+    // ── Top Jobs ──────────────────────────
+    function renderTopJobs(jobs) {
+        if (!jobs || jobs.length === 0) {
+            document.getElementById("topJobs").innerHTML =
+                `<div class="wb-empty-state" style="padding:20px;">
+                    <div class="icon" style="font-size:32px;">💼</div>
+                    <h5 style="font-size:14px;">No jobs posted yet</h5>
+                    <a href="jobs.html" class="btn-wb-primary mt-2"
+                       style="font-size:13px;padding:8px 16px;">Post a Job</a>
+                </div>`;
+            return;
+        }
+
+        document.getElementById("topJobs").innerHTML = jobs.map((job, i) => `
+            <div class="d-flex align-items-center justify-content-between py-3"
+                 style="border-bottom:1px solid var(--border);">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:28px;height:28px;background:var(--primary-light);
+                                border-radius:50%;display:flex;align-items:center;
+                                justify-content:center;font-size:12px;font-weight:800;
+                                color:var(--primary);">
+                        ${i + 1}
+                    </div>
+                    <div>
+                        <div style="font-size:13px;font-weight:700;">${job.title}</div>
+                        <div style="font-size:11px;color:var(--text-light);">
+                            ${jobTypeBadge(job.job_type)}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div style="font-size:16px;font-weight:800;color:var(--primary);">
+                        ${job.total_applications}
+                    </div>
+                    <div style="font-size:11px;color:var(--text-light);">applicants</div>
+                </div>
+            </div>`).join("");
+    }
+
+</script>
+<div class="wb-mobile-nav">
+    <a href="dashboard.html" class="active">
+        <i class="bi bi-grid"></i> Dashboard
+    </a>
+    <a href="jobs.html">
+        <i class="bi bi-briefcase"></i> Jobs
+    </a>
+    <a href="applications.html">
+        <i class="bi bi-file-text"></i> Applications
+    </a>
+    <a href="../index.html">
+        <i class="bi bi-eye"></i> View Site
+    </a>
+</div>
+</body>
+</html>

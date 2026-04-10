@@ -1,0 +1,7 @@
+Options -Indexes
+
+# Only allow PDF and DOC files to be accessed
+<FilesMatch "\.(php|php3|php4|php5|phtml)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>

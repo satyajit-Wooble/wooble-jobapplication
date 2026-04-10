@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="wooble_image/images.jpg">
+    <title>Jobs - Proof of Work Platform for Careers | Wooble</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .job-header {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            padding: 48px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .job-company-logo {
+            width: 72px;
+            height: 72px;
+            background: var(--white);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+            flex-shrink: 0;
+        }
+        .job-body {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 32px;
+        }
+        .job-body h5 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+        .job-body p {
+            color: var(--text-mid);
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        .apply-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            position: sticky;
+            top: 80px;
+        }
+        .apply-card .salary {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text-mid);
+        }
+        .detail-item:last-child { border-bottom: none; }
+        .detail-item .icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-light);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════ -->
+<nav class="wb-navbar navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html" style="margin-left: -50px;">
+    <img src="wooble_image/wooble_logo_blue_1.png" alt="Wooble Jobs" style="height:30px; width:auto;">
+</a>
+        <div class="d-flex gap-2 align-items-center">
+            <!-- Guest Nav -->
+            <div id="guestNav" class="d-flex gap-2">
+                <a href="login.html" class="btn-wb-outline">Sign In</a>
+                <a href="register.html" class="btn-wb-primary">Get Started</a>
+            </div>
+            <!-- User Nav -->
+            <div id="userNav" class="d-flex gap-2 align-items-center" style="display:none!important;">
+                <span class="text-muted small">! <span id="navUserName"></span></span>
+                <a href="#" id="dashboardLink" class="btn-wb-outline">Dashboard</a>
+                <button onclick="Auth.logout()" class="btn-wb-primary">Logout</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     BREADCRUMB
+══════════════════════════════════════════ -->
+<div style="background:var(--bg-light);border-bottom:1px solid var(--border);padding:12px 0;">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0" style="font-size:13px;">
+                <li class="breadcrumb-item"><a href="index.html">Jobs</a></li>
+                <li class="breadcrumb-item active" id="breadcrumbTitle">Job Detail</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LOADING STATE
+══════════════════════════════════════════ -->
+<div id="loadingState" class="text-center py-5">
+    <div class="wb-spinner" style="border-color:var(--border);border-top-color:var(--primary);width:36px;height:36px;border-width:3px;"></div>
+    <p class="text-muted mt-3">Loading job details...</p>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JOB CONTENT (hidden until loaded)
+══════════════════════════════════════════ -->
+<div id="jobContent" style="display:none;">
+
+    <!-- Job Header -->
+    <div class="job-header">
+        <div class="container">
+            <div class="d-flex gap-4 align-items-start flex-wrap">
+                <div class="job-company-logo" id="companyLogo">W</div>
+                <div class="flex-grow-1">
+                    <h1 id="jobTitle" style="font-size:28px;font-weight:800;color:var(--text-dark);margin-bottom:6px;"></h1>
+                    <p id="jobCompany" style="font-size:16px;color:var(--text-light);margin-bottom:16px;"></p>
+                    <div class="d-flex flex-wrap gap-2" id="jobBadges"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Body -->
+    <section class="wb-section" style="padding:48px 0;">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- Left: Description -->
+                <div class="col-lg-8">
+
+                    <!-- Alert -->
+                    <div id="pageAlert" class="wb-alert"></div>
+
+                    <!-- Description -->
+                    <div class="job-body mb-4">
+                        <h5><i class="bi bi-file-text text-primary"></i> Job Description</h5>
+                        <p id="jobDescription"></p>
+                    </div>
+
+                    <!-- Requirements -->
+                    <div class="job-body mb-4" id="requirementsSection">
+                        <h5><i class="bi bi-check-circle text-primary"></i> Requirements</h5>
+                        <p id="jobRequirements"></p>
+                    </div>
+
+                    <!-- Apply Form (shown only to candidates) -->
+                    <div class="job-body" id="applySection" style="display:none;">
+                        <h5><i class="bi bi-send text-primary"></i> Apply for this Job</h5>
+
+                        <div id="applyAlert" class="wb-alert"></div>
+
+                        <form id="applyForm" onsubmit="handleApply(event)">
+                            <div class="wb-form-group">
+                                <label>Cover Letter <span class="text-muted">(optional)</span></label>
+                                <textarea id="coverLetter" class="wb-form-control" rows="5"
+                                          placeholder="Tell us why you are a great fit for this role..."></textarea>
+                            </div>
+                            <div class="wb-form-group">
+                                <label>Resume <span class="text-muted">(PDF or DOC, max 2MB, optional)</span></label>
+                                <input type="file" id="resumeFile" class="wb-form-control"
+                                       accept=".pdf,.doc,.docx">
+                            </div>
+                            <button type="submit" class="btn-wb-primary px-5 py-3" id="applyBtn">
+                                <i class="bi bi-send"></i> Submit Application
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Already Applied Notice -->
+                    <div class="job-body" id="alreadyApplied" style="display:none;">
+                        <div class="text-center py-3">
+                            <div style="font-size:48px;">✅</div>
+                            <h5 class="mt-3" style="color:var(--success);">Already Applied!</h5>
+                            <p class="text-muted">You have already submitted your application for this job.</p>
+                            <a href="candidate/dashboard.html" class="btn-wb-primary">
+                                Track Application
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Login to Apply -->
+                    <div class="job-body" id="loginToApply" style="display:none;">
+                        <div class="text-center py-3">
+                            <div style="font-size:48px;">🔐</div>
+                            <h5 class="mt-3">Login to Apply</h5>
+                            <p class="text-muted">Create a free account or sign in to apply for this job.</p>
+                            <div class="d-flex gap-3 justify-content-center">
+                                <a href="login.html" class="btn-wb-outline">Sign In</a>
+                                <a href="register.html" class="btn-wb-primary">Create Account</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right: Apply Card -->
+                <div class="col-lg-4">
+                    <div class="apply-card">
+
+                        <!-- Salary -->
+                        <div class="salary" id="cardSalary"></div>
+                        <p class="text-muted mb-4" style="font-size:13px;">Per Month (CTC)</p>
+
+                        <!-- Quick Apply Button -->
+                        <div id="quickApplyBtn" style="display:none;">
+                            <button class="btn-wb-primary w-100 py-3 mb-4"
+                                    onclick="scrollToApply()">
+                                <i class="bi bi-send"></i> Apply Now
+                            </button>
+                        </div>
+
+                        <!-- Job Details -->
+                        <div class="detail-item">
+                            <div class="icon"><i class="bi bi-briefcase"></i></div>
+                            <div>
+                                <div style="font-size:11px;color:var(--text-light);font-weight:600;text-transform:uppercase;">Job Type</div>
+                                <div id="cardType" style="font-weight:600;"></div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="icon"><i class="bi bi-geo-alt"></i></div>
+                            <div>
+                                <div style="font-size:11px;color:var(--text-light);font-weight:600;text-transform:uppercase;">Location</div>
+                                <div id="cardLocation" style="font-weight:600;"></div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="icon"><i class="bi bi-building"></i></div>
+                            <div>
+                                <div style="font-size:11px;color:var(--text-light);font-weight:600;text-transform:uppercase;">Company</div>
+                                <div id="cardCompany" style="font-weight:600;"></div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="icon"><i class="bi bi-calendar"></i></div>
+                            <div>
+                                <div style="font-size:11px;color:var(--text-light);font-weight:600;text-transform:uppercase;">Posted On</div>
+                                <div id="cardDate" style="font-weight:600;"></div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="icon"><i class="bi bi-people"></i></div>
+                            <div>
+                                <div style="font-size:11px;color:var(--text-light);font-weight:600;text-transform:uppercase;">Applicants</div>
+                                <div id="cardApplicants" style="font-weight:600;"></div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="icon"><i class="bi bi-circle-fill" style="font-size:8px;"></i></div>
+                            <div>
+                                <div style="font-size:11px;color:var(--text-light);font-weight:600;text-transform:uppercase;">Status</div>
+                                <div id="cardStatus"></div>
+                            </div>
+                        </div>
+
+                        <!-- Share -->
+                        <div class="mt-4 pt-4" style="border-top:1px solid var(--border);">
+                            <p style="font-size:13px;font-weight:600;color:var(--text-light);margin-bottom:8px;">Share this job</p>
+                            <div class="d-flex gap-2">
+                                <button onclick="copyLink()"
+                                        class="btn-wb-outline flex-grow-1"
+                                        style="font-size:13px;padding:8px;">
+                                    <i class="bi bi-link-45deg"></i> Copy Link
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer class="wb-footer">
+    <div class="container">
+        <div class="footer-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span>© 2025 Wooble Jobs. All rights reserved.</span>
+            <a href="index.html" style="color:#94a3b8;">← Back to Jobs</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/jobs.js"></script>
+<script>
+
+    let jobId       = null;
+    let jobData     = null;
+    let hasApplied  = false;
+
+    // ── On Load ───────────────────────────
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Get job ID from URL
+        const params = new URLSearchParams(window.location.search);
+        jobId = params.get("id");
+
+        if (!jobId) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        // Setup dashboard link
+        const dashLink = document.getElementById("dashboardLink");
+        if (dashLink) {
+            dashLink.href = Auth.isAdmin()
+                ? "admin/dashboard.html"
+                : "candidate/dashboard.html";
+        }
+
+        await loadJob();
+    });
+
+    // ── Load Job ──────────────────────────
+    async function loadJob() {
+        const { data } = await apiRequest(`/jobs/single?id=${jobId}`);
+
+        document.getElementById("loadingState").style.display = "none";
+
+        if (!data.success) {
+            document.getElementById("jobContent").innerHTML = `
+                <div class="wb-empty-state py-5">
+                    <div class="icon">😕</div>
+                    <h5>Job Not Found</h5>
+                    <p>${data.message}</p>
+                    <a href="index.html" class="btn-wb-primary mt-3">Back to Jobs</a>
+                </div>`;
+            document.getElementById("jobContent").style.display = "block";
+            return;
+        }
+
+        jobData = data.data.job;
+        renderJob(jobData);
+        setupApplySection();
+    }
+
+    // ── Render Job ────────────────────────
+    function renderJob(job) {
+        document.title = `${job.title} — Wooble Jobs`;
+        document.getElementById("breadcrumbTitle").textContent = job.title;
+
+        // Header
+        document.getElementById("companyLogo").textContent    = job.company.charAt(0).toUpperCase();
+        document.getElementById("jobTitle").textContent       = job.title;
+        document.getElementById("jobCompany").innerHTML       = `<i class="bi bi-building"></i> ${job.company} &nbsp;·&nbsp; <i class="bi bi-geo-alt"></i> ${job.location}`;
+
+        document.getElementById("jobBadges").innerHTML = `
+            ${jobTypeBadge(job.job_type)}
+            ${statusBadge(job.status)}
+            ${job.salary_min ? `<span class="wb-badge wb-badge-green">💰 ${formatSalary(job.salary_min, job.salary_max)}</span>` : ""}
+            <span class="wb-badge wb-badge-gray"><i class="bi bi-people"></i> ${job.total_applications} Applied</span>`;
+
+        // Description
+        document.getElementById("jobDescription").textContent = job.description;
+
+        // Requirements
+        if (job.requirements) {
+            document.getElementById("jobRequirements").textContent = job.requirements;
+        } else {
+            document.getElementById("requirementsSection").style.display = "none";
+        }
+
+        // Sidebar card
+        document.getElementById("cardSalary").textContent     = formatSalary(job.salary_min, job.salary_max);
+        document.getElementById("cardType").textContent       = job.job_type.replace("-", " ").toUpperCase();
+        document.getElementById("cardLocation").textContent   = job.location;
+        document.getElementById("cardCompany").textContent    = job.company;
+        document.getElementById("cardDate").textContent       = formatDate(job.created_at);
+        document.getElementById("cardApplicants").textContent = `${job.total_applications} applicant(s)`;
+        document.getElementById("cardStatus").innerHTML       = statusBadge(job.status);
+
+        document.getElementById("jobContent").style.display = "block";
+    }
+
+    // ── Setup Apply Section ───────────────
+    function setupApplySection() {
+        if (!Auth.isLoggedIn()) {
+            // Not logged in → show login prompt
+            document.getElementById("loginToApply").style.display = "block";
+            return;
+        }
+
+        if (Auth.isAdmin()) {
+            // Admin → no apply section
+            return;
+        }
+
+        if (jobData.status !== "active") {
+            // Job closed
+            document.getElementById("applySection").style.display = "block";
+            document.getElementById("applySection").innerHTML = `
+                <div class="text-center py-3">
+                    <div style="font-size:48px;">🔒</div>
+                    <h5 class="mt-3 text-muted">Job Closed</h5>
+                    <p class="text-muted">This job is no longer accepting applications.</p>
+                </div>`;
+            return;
+        }
+
+        // Candidate → show apply form
+        document.getElementById("applySection").style.display  = "block";
+        document.getElementById("quickApplyBtn").style.display = "block";
+    }
+
+    // ── Handle Apply ──────────────────────
+    async function handleApply(e) {
+        e.preventDefault();
+
+        const coverLetter = document.getElementById("coverLetter").value.trim();
+        const resumeFile  = document.getElementById("resumeFile").files[0];
+        const btn         = document.getElementById("applyBtn");
+
+        btn.innerHTML = '<span class="wb-spinner"></span> Submitting...';
+        btn.disabled  = true;
+
+        let result;
+
+        if (resumeFile) {
+            // Use FormData for file upload
+            const formData = new FormData();
+            if (coverLetter) formData.append("cover_letter", coverLetter);
+            formData.append("resume", resumeFile);
+            result = await apiFormRequest(`/applications/apply?id=${jobId}`, formData);
+        } else {
+            // JSON request without file
+            result = await apiRequest(
+                `/applications/apply?id=${jobId}`,
+                "POST",
+                { cover_letter: coverLetter },
+                true
+            );
+        }
+
+        btn.innerHTML = '<i class="bi bi-send"></i> Submit Application';
+        btn.disabled  = false;
+
+        if (!result.data.success) {
+            showAlert("applyAlert", result.data.message, "danger");
+            return;
+        }
+
+        // Success — show applied state
+        document.getElementById("applySection").style.display   = "none";
+        document.getElementById("quickApplyBtn").style.display  = "none";
+        document.getElementById("alreadyApplied").style.display = "block";
+        showAlert("pageAlert", "🎉 Application submitted successfully! Good luck!", "success");
+    }
+
+    // ── Scroll to Apply Form ──────────────
+    function scrollToApply() {
+        document.getElementById("applySection").scrollIntoView({
+            behavior: "smooth", block: "start"
+        });
+    }
+
+    // ── Copy Job Link ─────────────────────
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showAlert("pageAlert", "Job link copied to clipboard!", "success");
+        });
+    }
+
+</script>
+</body>
+</html>

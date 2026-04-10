@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
+    <title>Jobs - Admin | Wooble</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { background: var(--bg-light); }
+
+        .wb-sidebar {
+            background: var(--navy);
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav { padding: 12px 0; flex: 1; }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08);
+            color: var(--white);
+            border-right: 3px solid var(--accent);
+        }
+
+        .sidebar-nav a.active { font-weight: 700; color: var(--white); }
+
+        .sidebar-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .wb-main { margin-left: 240px; min-height: 100vh; }
+
+        .wb-topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .job-row {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .job-row:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        @media(max-width:768px) {
+            .wb-sidebar { display: none; }
+            .wb-main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════ -->
+<div class="wb-sidebar">
+    <div class="sidebar-brand">
+        <a href="../index.html" style="text-decoration:none;">
+            <span style="font-size:18px;font-weight:800;color:var(--white);"> Wooble Jobs</span>
+        </a>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">Admin Panel</div>
+    </div>
+
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" id="sidebarAvatar">A</div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:var(--white);"
+                     id="sidebarName">Loading...</div>
+                <div style="font-size:12px;color:#64748b;">Administrator</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="dashboard.html">
+            <i class="bi bi-grid"></i> Dashboard
+        </a>
+        <a href="jobs.html" class="active">
+            <i class="bi bi-briefcase"></i> Manage Jobs
+        </a>
+        <a href="applications.html">
+            <i class="bi bi-file-text"></i> Applications
+        </a>
+        <a href="../index.html">
+            <i class="bi bi-eye"></i> View Site
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <button onclick="Auth.logout()"
+                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+                       color:#94a3b8;border-radius:var(--radius-pill);padding:9px 16px;
+                       font-size:13px;width:100%;cursor:pointer;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════ -->
+<div class="wb-main">
+
+    <!-- Topbar -->
+    <div class="wb-topbar">
+        <div>
+            <h5 style="margin:0;font-weight:700;">Manage Jobs</h5>
+            <p class="text-muted mb-0" style="font-size:13px;">
+                Create, edit and manage your job postings
+            </p>
+        </div>
+        <button class="btn-wb-primary" onclick="openCreateModal()">
+            <i class="bi bi-plus-lg"></i> Post New Job
+        </button>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:32px;">
+
+        <!-- Alert -->
+        <div id="pageAlert" class="wb-alert"></div>
+
+        <!-- Filter Bar -->
+        <div class="wb-filter-bar d-flex flex-wrap gap-3 align-items-center mb-4">
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <i class="bi bi-search text-muted"></i>
+                <input type="text" id="searchJobs" class="form-control border-0 shadow-none"
+                       placeholder="Search jobs..." onkeyup="debounceSearch()"
+                       style="background:transparent;">
+            </div>
+            <select id="filterStatus" class="form-select w-auto" onchange="loadJobs()">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="closed">Closed</option>
+            </select>
+            <select id="filterType" class="form-select w-auto" onchange="loadJobs()">
+                <option value="">All Types</option>
+                <option value="full-time">Full Time</option>
+                <option value="part-time">Part Time</option>
+                <option value="remote">Remote</option>
+                <option value="contract">Contract</option>
+            </select>
+        </div>
+
+        <!-- Jobs Count -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <p class="text-muted mb-0" style="font-size:14px;" id="jobCount">Loading...</p>
+        </div>
+
+        <!-- Jobs List -->
+        <div id="jobsList">
+            <div class="text-center py-5 text-muted">
+                <div class="wb-spinner" style="border-color:var(--border);
+                     border-top-color:var(--primary);width:32px;height:32px;
+                     border-width:3px;"></div>
+                <p class="mt-3">Loading jobs...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="wb-pagination" id="pagination"></div>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CREATE / EDIT JOB MODAL
+══════════════════════════════════════════ -->
+<div class="modal fade" id="jobModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:var(--radius-md);border:none;">
+            <div class="modal-header wb-modal-header">
+                <h5 class="modal-title" id="modalTitle">Post New Job</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+
+                <div id="modalAlert" class="wb-alert"></div>
+
+                <form id="jobForm" onsubmit="handleJobSubmit(event)">
+                    <input type="hidden" id="jobId">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Job Title *</label>
+                                <input type="text" id="fTitle" class="wb-form-control"
+                                       placeholder="e.g. PHP Developer" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Company Name *</label>
+                                <input type="text" id="fCompany" class="wb-form-control"
+                                       placeholder="e.g. Wooble Tech" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Location *</label>
+                                <input type="text" id="fLocation" class="wb-form-control"
+                                       placeholder="e.g. Bhubaneswar, Odisha" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Job Type *</label>
+                                <select id="fType" class="wb-form-control" required>
+                                    <option value="">Select Type</option>
+                                    <option value="full-time">Full Time</option>
+                                    <option value="part-time">Part Time</option>
+                                    <option value="remote">Remote</option>
+                                    <option value="contract">Contract</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Min Salary (₹/month)</label>
+                                <input type="number" id="fSalaryMin" class="wb-form-control"
+                                       placeholder="e.g. 25000">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Max Salary (₹/month)</label>
+                                <input type="number" id="fSalaryMax" class="wb-form-control"
+                                       placeholder="e.g. 50000">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="wb-form-group">
+                                <label>Job Description *</label>
+                                <textarea id="fDescription" class="wb-form-control"
+                                          rows="4" required
+                                          placeholder="Describe the role, responsibilities..."></textarea>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="wb-form-group">
+                                <label>Requirements</label>
+                                <textarea id="fRequirements" class="wb-form-control"
+                                          rows="3"
+                                          placeholder="Skills, experience, qualifications..."></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Status</label>
+                                <select id="fStatus" class="wb-form-control">
+                                    <option value="active">Active</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer" style="border-top:1px solid var(--border);">
+                <button type="button" class="btn-wb-outline"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="jobForm" class="btn-wb-primary px-4"
+                        id="submitJobBtn">
+                    Post Job
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DELETE CONFIRM MODAL
+══════════════════════════════════════════ -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content" style="border-radius:var(--radius-md);border:none;">
+            <div class="modal-body p-4 text-center">
+                <div style="font-size:48px;margin-bottom:16px;">🗑️</div>
+                <h5 style="font-weight:700;">Delete Job?</h5>
+                <p class="text-muted" style="font-size:14px;" id="deleteJobTitle">
+                    Are you sure you want to delete this job?
+                </p>
+                <div class="d-flex gap-2 justify-content-center mt-3">
+                    <button class="btn-wb-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn-wb-danger" onclick="confirmDelete()" id="confirmDeleteBtn">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/applications.js"></script>
+<script>
+
+    // let currentPage    = 1;
+    // let debounceTimer  = null;
+    let deleteJobId    = null;
+    let editMode       = false;
+
+    // ── On Load ───────────────────────────
+    document.addEventListener("DOMContentLoaded", () => {
+    if (!requireAuth("admin")) return;
+
+    const user = Auth.getUser();
+    if (user) {
+        document.getElementById("sidebarName").textContent   = user.name;
+        document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+    }
+
+    loadJobs();
+
+    // Auto-open Post Job modal if redirected from dashboard
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "new") {
+        openCreateModal();
+    }
+});
+
+    // ── Load Jobs ─────────────────────────
+    async function loadJobs(page = 1) {
+        currentPage = page;
+
+        const search = document.getElementById("searchJobs").value.trim();
+        const status = document.getElementById("filterStatus").value;
+        const type   = document.getElementById("filterType").value;
+
+        let query = `?page=${page}`;
+        if (search) query += `&search=${encodeURIComponent(search)}`;
+        if (status) query += `&status=${status}`;
+        if (type)   query += `&type=${type}`;
+
+        // For admin we fetch all jobs not just active
+        const { data } = await apiRequest(`/jobs${query}`, "GET", null, true);
+
+        if (!data.success) {
+            document.getElementById("jobsList").innerHTML = `
+                <div class="wb-empty-state">
+                    <div class="icon">😕</div>
+                    <h5>Failed to load jobs</h5>
+                    <p>${data.message}</p>
+                </div>`;
+            return;
+        }
+
+        const { jobs, total, total_pages } = data.data;
+        document.getElementById("jobCount").textContent = `${total} job${total !== 1 ? "s" : ""} found`;
+
+        if (jobs.length === 0) {
+            document.getElementById("jobsList").innerHTML = `
+                <div class="wb-empty-state">
+                    <div class="icon">💼</div>
+                    <h5>No jobs found</h5>
+                    <p>Post your first job to get started!</p>
+                    <button class="btn-wb-primary mt-3" onclick="openCreateModal()">
+                        Post New Job
+                    </button>
+                </div>`;
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+
+        document.getElementById("jobsList").innerHTML = jobs.map(job => `
+            <div class="job-row">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                    <!-- Left -->
+                    <div class="d-flex gap-3 align-items-start">
+                        <div style="width:48px;height:48px;background:var(--primary-light);
+                                    border-radius:var(--radius-sm);display:flex;
+                                    align-items:center;justify-content:center;
+                                    font-weight:800;color:var(--primary);font-size:18px;
+                                    flex-shrink:0;">
+                            ${job.company.charAt(0)}
+                        </div>
+                        <div>
+                            <div style="font-size:16px;font-weight:700;margin-bottom:4px;">
+                                ${job.title}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);margin-bottom:10px;">
+                                <i class="bi bi-building"></i> ${job.company}
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-geo-alt"></i> ${job.location}
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-clock"></i> ${formatDate(job.created_at)}
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                ${jobTypeBadge(job.job_type)}
+                                ${statusBadge(job.status)}
+                                ${job.salary_min ? `
+                                <span class="wb-badge wb-badge-green">
+                                    💰 ${formatSalary(job.salary_min, job.salary_max)}
+                                </span>` : ""}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Actions -->
+                    <div class="d-flex flex-column align-items-end gap-2">
+                        <div style="font-size:22px;font-weight:800;color:var(--primary);">
+                            ${job.total_applications || 0}
+                        </div>
+                        <div style="font-size:11px;color:var(--text-light);">applicants</div>
+                        <div class="d-flex gap-2 mt-1">
+                            <a href="../job-detail.html?id=${job.id}"
+                               class="btn-wb-outline"
+                               style="font-size:12px;padding:6px 12px;"
+                               target="_blank">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <button onclick="openEditModal(${JSON.stringify(job).replace(/"/g, '&quot;')})"
+                                    class="btn-wb-outline"
+                                    style="font-size:12px;padding:6px 12px;">
+                                <i class="bi bi-pencil"></i> Edit
+                            </button>
+                            <button onclick="openDeleteModal(${job.id}, '${job.title.replace(/'/g, "\\'")}')"
+                                    class="btn-wb-danger"
+                                    style="font-size:12px;padding:6px 12px;">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>`).join("");
+
+        // Pagination
+        renderPagination(total_pages, page);
+    }
+
+    // ── Open Create Modal ─────────────────
+    function openCreateModal() {
+        editMode = false;
+        document.getElementById("modalTitle").textContent  = "Post New Job";
+        document.getElementById("submitJobBtn").textContent = "Post Job";
+        document.getElementById("jobId").value             = "";
+        document.getElementById("jobForm").reset();
+        document.getElementById("modalAlert").className    = "wb-alert";
+        new bootstrap.Modal(document.getElementById("jobModal")).show();
+    }
+
+    // ── Open Edit Modal ───────────────────
+    function openEditModal(job) {
+        editMode = true;
+        document.getElementById("modalTitle").textContent  = "Edit Job";
+        document.getElementById("submitJobBtn").textContent = "Save Changes";
+        document.getElementById("modalAlert").className    = "wb-alert";
+
+        // Fill form
+        document.getElementById("jobId").value          = job.id;
+        document.getElementById("fTitle").value         = job.title;
+        document.getElementById("fCompany").value       = job.company;
+        document.getElementById("fLocation").value      = job.location;
+        document.getElementById("fType").value          = job.job_type;
+        document.getElementById("fSalaryMin").value     = job.salary_min || "";
+        document.getElementById("fSalaryMax").value     = job.salary_max || "";
+        document.getElementById("fDescription").value   = job.description;
+        document.getElementById("fRequirements").value  = job.requirements || "";
+        document.getElementById("fStatus").value        = job.status;
+
+        new bootstrap.Modal(document.getElementById("jobModal")).show();
+    }
+
+    // ── Handle Job Submit ─────────────────
+    async function handleJobSubmit(e) {
+        e.preventDefault();
+
+        const btn    = document.getElementById("submitJobBtn");
+        const jobId  = document.getElementById("jobId").value;
+
+        const payload = {
+            title:        document.getElementById("fTitle").value.trim(),
+            company:      document.getElementById("fCompany").value.trim(),
+            location:     document.getElementById("fLocation").value.trim(),
+            job_type:     document.getElementById("fType").value,
+            salary_min:   document.getElementById("fSalaryMin").value || null,
+            salary_max:   document.getElementById("fSalaryMax").value || null,
+            description:  document.getElementById("fDescription").value.trim(),
+            requirements: document.getElementById("fRequirements").value.trim(),
+            status:       document.getElementById("fStatus").value
+        };
+
+        btn.innerHTML = '<span class="wb-spinner"></span> Saving...';
+        btn.disabled  = true;
+
+        let result;
+        if (editMode) {
+            result = await apiRequest(`/jobs/update?id=${jobId}`, "PUT", payload, true);
+        } else {
+            result = await apiRequest("/jobs/create", "POST", payload, true);
+        }
+
+        btn.innerHTML = editMode ? "Save Changes" : "Post Job";
+        btn.disabled  = false;
+
+        if (!result.data.success) {
+            showAlert("modalAlert", result.data.message, "danger");
+            return;
+        }
+
+        // Close modal & reload
+        bootstrap.Modal.getInstance(document.getElementById("jobModal")).hide();
+        showAlert("pageAlert", editMode ? "Job updated successfully!" : "Job posted successfully!", "success");
+        loadJobs(currentPage);
+    }
+
+    // ── Open Delete Modal ─────────────────
+    function openDeleteModal(id, title) {
+        deleteJobId = id;
+        document.getElementById("deleteJobTitle").textContent =
+            `Are you sure you want to delete "${title}"?`;
+        new bootstrap.Modal(document.getElementById("deleteModal")).show();
+    }
+
+    // ── Confirm Delete ────────────────────
+    async function confirmDelete() {
+        const btn = document.getElementById("confirmDeleteBtn");
+        btn.innerHTML = '<span class="wb-spinner"></span>';
+        btn.disabled  = true;
+
+        const { data } = await apiRequest(`/jobs/delete?id=${deleteJobId}`, "DELETE", null, true);
+
+        btn.innerHTML = "Delete";
+        btn.disabled  = false;
+
+        bootstrap.Modal.getInstance(document.getElementById("deleteModal")).hide();
+
+        if (!data.success) {
+            showAlert("pageAlert", data.message, "danger");
+            return;
+        }
+
+        showAlert("pageAlert", data.data.action === "deleted"
+            ? "Job deleted successfully!"
+            : "Job has applications — it has been closed instead.", "success");
+        loadJobs(currentPage);
+    }
+
+    // ── Pagination ────────────────────────
+    function renderPagination(totalPages, current) {
+        if (totalPages <= 1) {
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+        let html = "";
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="wb-page-btn ${i === current ? "active" : ""}"
+                             onclick="loadJobs(${i})">${i}</button>`;
+        }
+        document.getElementById("pagination").innerHTML = html;
+    }
+
+    // ── Debounce Search ───────────────────
+    function debounceSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => loadJobs(1), 500);
+    }
+
+</script>
+<div class="wb-mobile-nav">
+    <a href="dashboard.html">
+        <i class="bi bi-grid"></i> Dashboard
+    </a>
+    <a href="jobs.html" class="active">
+        <i class="bi bi-briefcase"></i> Jobs
+    </a>
+    <a href="applications.html">
+        <i class="bi bi-file-text"></i> Applications
+    </a>
+    <a href="../index.html">
+        <i class="bi bi-eye"></i> View Site
+    </a>
+</div>
+</body>
+</html>

@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
+    <title>Jobs - Admin | Wooble</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { background: var(--bg-light); }
+
+        .wb-sidebar {
+            background: var(--navy);
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav { padding: 12px 0; flex: 1; }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08);
+            color: var(--white);
+            border-right: 3px solid var(--accent);
+        }
+
+        .sidebar-nav a.active { font-weight: 700; color: var(--white); }
+
+        .sidebar-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .wb-main { 
+            margin-left: 240px; 
+            min-height: 100vh; 
+        }
+
+        .wb-topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0px;
+            z-index: 50;
+        }
+
+        .app-row {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .app-row:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .candidate-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        @media(max-width:768px) {
+            .wb-sidebar { display: none; }
+            .wb-main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════ -->
+<div class="wb-sidebar">
+    <div class="sidebar-brand">
+        <a href="../index.html" style="text-decoration:none;">
+            <span style="font-size:18px;font-weight:800;color:var(--white);"> Wooble Jobs</span>
+        </a>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">Admin Panel</div>
+    </div>
+
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" id="sidebarAvatar">A</div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:var(--white);"
+                     id="sidebarName">Loading...</div>
+                <div style="font-size:12px;color:#64748b;">Administrator</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="dashboard.html">
+            <i class="bi bi-grid"></i> Dashboard
+        </a>
+        <a href="jobs.html">
+            <i class="bi bi-briefcase"></i> Manage Jobs
+        </a>
+        <a href="applications.html" class="active">
+            <i class="bi bi-file-text"></i> Applications
+        </a>
+        <a href="../index.html">
+            <i class="bi bi-eye"></i> View Site
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <button onclick="Auth.logout()"
+                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+                       color:#94a3b8;border-radius:var(--radius-pill);padding:9px 16px;
+                       font-size:13px;width:100%;cursor:pointer;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════ -->
+<div class="wb-main">
+
+    <!-- Topbar -->
+    <div class="wb-topbar">
+        <div>
+            <h5 style="margin:0;font-weight:700;">Applications</h5>
+            <p class="text-muted mb-0" style="font-size:13px;">
+                Review and manage all candidate applications
+            </p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="wb-badge wb-badge-blue" id="topbarCount">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:32px;">
+
+        <!-- Alert -->
+        <div id="pageAlert" class="wb-alert"></div>
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card" style="cursor:pointer;"
+                     onclick="filterByStatus('pending')">
+                    <div class="icon icon-yellow">🕐</div>
+                    <div>
+                        <div class="stat-number" id="sumPending">—</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card" style="cursor:pointer;"
+                     onclick="filterByStatus('shortlisted')">
+                    <div class="icon icon-blue">⭐</div>
+                    <div>
+                        <div class="stat-number" id="sumShortlisted">—</div>
+                        <div class="stat-label">Shortlisted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card" style="cursor:pointer;"
+                     onclick="filterByStatus('invited')">
+                    <div class="icon icon-green">📅</div>
+                    <div>
+                        <div class="stat-number" id="sumInvited">—</div>
+                        <div class="stat-label">Invited</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card" style="cursor:pointer;"
+                     onclick="filterByStatus('rejected')">
+                    <div class="icon icon-red">❌</div>
+                    <div>
+                        <div class="stat-number" id="sumRejected">—</div>
+                        <div class="stat-label">Rejected</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="wb-filter-bar d-flex flex-wrap gap-3 align-items-center mb-4">
+            <select id="filterStatus" class="form-select w-auto" onchange="loadApplications()">
+                <option value="">All Status</option>
+                <option value="pending">🕐 Pending</option>
+                <option value="shortlisted">⭐ Shortlisted</option>
+                <option value="invited">📅 Invited</option>
+                <option value="rejected">❌ Rejected</option>
+            </select>
+            <select id="filterJob" class="form-select w-auto" onchange="loadApplications()">
+                <option value="">All Jobs</option>
+            </select>
+            <span class="text-muted" style="font-size:13px;" id="appCount"></span>
+        </div>
+
+        <!-- Applications List -->
+        <div id="appsList">
+            <div class="text-center py-5 text-muted">
+                <div class="wb-spinner"
+                     style="border-color:var(--border);border-top-color:var(--primary);
+                            width:32px;height:32px;border-width:3px;"></div>
+                <p class="mt-3">Loading applications...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="wb-pagination" id="pagination"></div>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APPLICATION DETAIL MODAL
+══════════════════════════════════════════ -->
+<div class="modal fade" id="appModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:var(--radius-md);border:none;">
+            <div class="modal-header wb-modal-header">
+                <h5 class="modal-title">Application Detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="appModalContent">
+                Loading...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     UPDATE STATUS MODAL
+══════════════════════════════════════════ -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:var(--radius-md);border:none;">
+            <div class="modal-header wb-modal-header">
+                <h5 class="modal-title" id="statusModalTitle">Update Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+
+                <div id="statusAlert" class="wb-alert"></div>
+
+                <input type="hidden" id="statusAppId">
+
+                <!-- Candidate Info -->
+                <div class="d-flex align-items-center gap-3 mb-4 p-3"
+                     style="background:var(--bg-light);border-radius:var(--radius-sm);">
+                    <div class="candidate-avatar" id="statusAvatar">J</div>
+                    <div>
+                        <div style="font-weight:700;" id="statusCandidateName"></div>
+                        <div style="font-size:13px;color:var(--text-light);"
+                             id="statusJobTitle"></div>
+                    </div>
+                </div>
+
+                <!-- Status Selector -->
+                <div class="wb-form-group">
+                    <label>New Status *</label>
+                    <div class="row g-2" id="statusOptions">
+                        <div class="col-6">
+                            <div class="status-option p-3 text-center"
+                                 style="border:2px solid var(--border);border-radius:var(--radius-sm);
+                                        cursor:pointer;transition:all 0.2s;"
+                                 onclick="selectStatus('shortlisted', this)">
+                                <div style="font-size:24px;">⭐</div>
+                                <div style="font-size:13px;font-weight:700;">Shortlist</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="status-option p-3 text-center"
+                                 style="border:2px solid var(--border);border-radius:var(--radius-sm);
+                                        cursor:pointer;transition:all 0.2s;"
+                                 onclick="selectStatus('invited', this)">
+                                <div style="font-size:24px;">📅</div>
+                                <div style="font-size:13px;font-weight:700;">Invite</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="status-option p-3 text-center"
+                                 style="border:2px solid var(--border);border-radius:var(--radius-sm);
+                                        cursor:pointer;transition:all 0.2s;"
+                                 onclick="selectStatus('pending', this)">
+                                <div style="font-size:24px;">🕐</div>
+                                <div style="font-size:13px;font-weight:700;">Pending</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="status-option p-3 text-center"
+                                 style="border:2px solid var(--border);border-radius:var(--radius-sm);
+                                        cursor:pointer;transition:all 0.2s;"
+                                 onclick="selectStatus('rejected', this)">
+                                <div style="font-size:24px;">❌</div>
+                                <div style="font-size:13px;font-weight:700;">Reject</div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selectedStatus">
+                </div>
+
+                <!-- Admin Note -->
+                <div class="wb-form-group">
+                    <label>Admin Note <span class="text-muted">(optional)</span></label>
+                    <textarea id="adminNote" class="wb-form-control" rows="2"
+                              placeholder="Internal note about this decision..."></textarea>
+                </div>
+
+                <!-- Interview Fields (shown only for invited) -->
+                <div id="interviewFields" style="display:none;">
+                    <div class="wb-form-group">
+                        <label>Interview Date & Time</label>
+                        <input type="datetime-local" id="interviewDate" class="wb-form-control">
+                    </div>
+                    <div class="wb-form-group">
+                        <label>Invitation Message</label>
+                        <textarea id="inviteMessage" class="wb-form-control" rows="3"
+                                  placeholder="Dear candidate, you are invited for an interview..."></textarea>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="border-top:1px solid var(--border);">
+                <button class="btn-wb-outline" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn-wb-primary px-4" onclick="submitStatus()" id="submitStatusBtn">
+                    Update Status
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/applications.js"></script>
+<script>
+
+    currentPage    = 1;
+    selectedStatus = "";
+
+    // ── On Load ───────────────────────────
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!requireAuth("admin")) return;
+
+        const user = Auth.getUser();
+        document.getElementById("sidebarName").textContent   = user.name;
+        document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+
+        loadSummary();
+        loadJobsDropdown();
+        loadApplications();
+    });
+
+    // ── Load Summary ──────────────────────
+    async function loadSummary() {
+        const { data } = await apiRequest("/applications", "GET", null, true);
+        if (!data.success) return;
+
+        const s = data.data.summary;
+        document.getElementById("sumPending").textContent     = s.pending     || 0;
+        document.getElementById("sumShortlisted").textContent = s.shortlisted || 0;
+        document.getElementById("sumInvited").textContent     = s.invited     || 0;
+        document.getElementById("sumRejected").textContent    = s.rejected    || 0;
+        document.getElementById("topbarCount").textContent    = `${s.total || 0} Total Applications`;
+    }
+
+    // ── Load Jobs Dropdown ────────────────
+    async function loadJobsDropdown() {
+        const { data } = await apiRequest("/jobs", "GET", null, true);
+        if (!data.success) return;
+
+        const select = document.getElementById("filterJob");
+        data.data.jobs.forEach(job => {
+            const opt   = document.createElement("option");
+            opt.value   = job.id;
+            opt.textContent = job.title;
+            select.appendChild(opt);
+        });
+    }
+
+    // ── Load Applications ─────────────────
+    async function loadApplications(page = 1) {
+        currentPage = page;
+
+        const status = document.getElementById("filterStatus").value;
+        const jobId  = document.getElementById("filterJob").value;
+
+        let query = `?page=${page}`;
+        if (status) query += `&status=${status}`;
+        if (jobId)  query += `&job_id=${jobId}`;
+
+        const { data } = await apiRequest(`/applications${query}`, "GET", null, true);
+
+        if (!data.success) {
+            document.getElementById("appsList").innerHTML = `
+                <div class="wb-empty-state">
+                    <div class="icon">😕</div>
+                    <h5>Failed to load applications</h5>
+                    <p>${data.message}</p>
+                </div>`;
+            return;
+        }
+
+        const { applications, total, total_pages } = data.data;
+        document.getElementById("appCount").textContent = `${total} application${total !== 1 ? "s" : ""} found`;
+
+        if (applications.length === 0) {
+            document.getElementById("appsList").innerHTML = `
+                <div class="wb-empty-state">
+                    <div class="icon">📋</div>
+                    <h5>No applications found</h5>
+                    <p>No applications match your current filters</p>
+                </div>`;
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+
+        document.getElementById("appsList").innerHTML = applications.map(app => `
+            <div class="app-row">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                    <!-- Left: Candidate Info -->
+                    <div class="d-flex gap-3 align-items-start">
+                        <div class="candidate-avatar">
+                            ${app.candidate_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="font-size:15px;font-weight:700;margin-bottom:2px;">
+                                ${app.candidate_name}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);margin-bottom:8px;">
+                                <i class="bi bi-envelope"></i> ${app.candidate_email}
+                                ${app.candidate_phone ? `&nbsp;·&nbsp;<i class="bi bi-phone"></i> ${app.candidate_phone}` : ""}
+                            </div>
+                            <div style="font-size:13px;margin-bottom:8px;">
+                                <strong>Applied for:</strong> ${app.job_title}
+                                <span class="text-muted">@ ${app.company}</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                ${statusBadge(app.status)}
+                                ${jobTypeBadge(app.job_type)}
+                                <span class="wb-badge wb-badge-gray">
+                                    <i class="bi bi-clock"></i> ${formatDate(app.applied_at)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Actions -->
+                    <div class="d-flex flex-column gap-2 align-items-end">
+                        <button onclick="viewDetail(${app.application_id})"
+                                class="btn-wb-outline"
+                                style="font-size:13px;padding:8px 16px;">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                        <button onclick="openStatusModal(
+                                    ${app.application_id},
+                                    '${app.candidate_name.replace(/'/g, "\\'")}',
+                                    '${app.job_title.replace(/'/g, "\\'")}',
+                                    '${app.candidate_email}')"
+                                class="btn-wb-primary"
+                                style="font-size:13px;padding:8px 16px;">
+                            <i class="bi bi-pencil-square"></i> Update Status
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Admin Note if exists -->
+                ${app.admin_note ? `
+                <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
+                    <span style="font-size:12px;color:var(--text-light);font-weight:600;">
+                        ADMIN NOTE:
+                    </span>
+                    <span style="font-size:13px;color:var(--text-mid);"> ${app.admin_note}</span>
+                </div>` : ""}
+
+            </div>`).join("");
+
+        renderPagination(total_pages, page);
+    }
+
+    // ── View Detail ───────────────────────
+    async function viewDetail(id) {
+        const modal = new bootstrap.Modal(document.getElementById("appModal"));
+        document.getElementById("appModalContent").innerHTML = `
+            <div class="text-center py-4">
+                <div class="wb-spinner"
+                     style="border-color:var(--border);border-top-color:var(--primary);
+                            width:32px;height:32px;border-width:3px;"></div>
+                <p class="text-muted mt-3">Loading...</p>
+            </div>`;
+        modal.show();
+
+        const { data } = await apiRequest(`/applications/single?id=${id}`, "GET", null, true);
+
+        if (!data.success) {
+            document.getElementById("appModalContent").innerHTML = `
+                <div class="wb-empty-state">
+                    <h5>Failed to load</h5>
+                    <p>${data.message}</p>
+                </div>`;
+            return;
+        }
+
+        const { application, job, candidate, invitation } = data.data;
+
+        document.getElementById("appModalContent").innerHTML = `
+
+            <!-- Status Banner -->
+            <div class="p-3 mb-4 text-center"
+                 style="background:var(--primary-light);border-radius:var(--radius-sm);">
+                <div style="font-size:32px;">
+                    ${{ pending:"🕐", shortlisted:"⭐", invited:"🎯", rejected:"❌" }[application.status]}
+                </div>
+                <div class="mt-2">${statusBadge(application.status)}</div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Candidate -->
+                <div class="col-md-6">
+                    <h6 style="font-weight:700;font-size:11px;color:var(--text-light);
+                               text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+                        Candidate
+                    </h6>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="candidate-avatar">
+                            ${candidate.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="font-weight:700;">${candidate.name}</div>
+                            <div style="font-size:13px;color:var(--text-light);">
+                                ${candidate.email}
+                            </div>
+                            ${candidate.phone ? `
+                            <div style="font-size:13px;color:var(--text-light);">
+                                ${candidate.phone}
+                            </div>` : ""}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job -->
+                <div class="col-md-6">
+                    <h6 style="font-weight:700;font-size:11px;color:var(--text-light);
+                               text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+                        Job
+                    </h6>
+                    <div style="font-size:16px;font-weight:700;">${job.title}</div>
+                    <div style="font-size:13px;color:var(--text-light);">
+                        ${job.company} · ${job.location}
+                    </div>
+                    <div class="mt-2">${jobTypeBadge(job.job_type)}</div>
+                </div>
+            </div>
+
+            <hr style="border-color:var(--border);margin:20px 0;">
+
+            <!-- Dates -->
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div style="font-size:11px;color:var(--text-light);font-weight:600;
+                                text-transform:uppercase;">Applied On</div>
+                    <div style="font-weight:600;">${formatDate(application.applied_at)}</div>
+                </div>
+                <div class="col-6">
+                    <div style="font-size:11px;color:var(--text-light);font-weight:600;
+                                text-transform:uppercase;">Last Updated</div>
+                    <div style="font-weight:600;">${formatDate(application.updated_at) || "—"}</div>
+                </div>
+            </div>
+
+            <!-- Cover Letter -->
+            ${application.cover_letter ? `
+            <div class="mb-4">
+                <h6 style="font-weight:700;font-size:11px;color:var(--text-light);
+                           text-transform:uppercase;letter-spacing:0.5px;">Cover Letter</h6>
+                <div style="background:var(--bg-light);padding:16px;border-radius:var(--radius-sm);
+                            font-size:14px;color:var(--text-mid);line-height:1.7;">
+                    ${application.cover_letter}
+                </div>
+            </div>` : `
+            <div class="mb-4">
+                <p class="text-muted" style="font-size:13px;">No cover letter provided.</p>
+            </div>`}
+
+            <!-- Resume -->
+            ${application.resume_path ? `
+            <div class="mb-4">
+                <h6 style="font-weight:700;font-size:11px;color:var(--text-light);
+                           text-transform:uppercase;letter-spacing:0.5px;">Resume</h6>
+                <a href="${FRONTEND_BASE}/${application.resume_path}" target="_blank" class="btn-wb-outline"
+                   style="font-size:13px;padding:8px 16px;">
+                    <i class="bi bi-file-earmark-pdf"></i> View Resume
+                </a>
+            </div>` : ""}
+
+            <!-- Admin Note -->
+            ${application.admin_note ? `
+            <div class="mb-4">
+                <h6 style="font-weight:700;font-size:11px;color:var(--text-light);
+                           text-transform:uppercase;letter-spacing:0.5px;">Admin Note</h6>
+                <div style="background:#fef9c3;padding:16px;border-radius:var(--radius-sm);
+                            font-size:14px;">
+                    ${application.admin_note}
+                </div>
+            </div>` : ""}
+
+            <!-- Invitation -->
+            ${invitation ? `
+            <div style="background:#dcfce7;padding:20px;border-radius:var(--radius-sm);">
+                <h6 style="font-weight:700;color:var(--success);margin-bottom:12px;">
+                    📅 Interview Invitation Sent
+                </h6>
+                ${invitation.interview_date ? `
+                <div class="mb-2">
+                    <span style="font-size:12px;color:var(--text-light);font-weight:600;">
+                        DATE & TIME
+                    </span><br>
+                    <strong>${formatDate(invitation.interview_date)}</strong>
+                </div>` : ""}
+                ${invitation.message ? `
+                <div>
+                    <span style="font-size:12px;color:var(--text-light);font-weight:600;">
+                        MESSAGE
+                    </span><br>
+                    <span style="font-size:14px;">${invitation.message}</span>
+                </div>` : ""}
+                <div class="mt-2" style="font-size:12px;color:var(--text-light);">
+                    Sent on: ${formatDate(invitation.sent_at)}
+                </div>
+            </div>` : ""}
+
+            <!-- Action Button -->
+            <div class="mt-4 text-end">
+                <button onclick="bootstrap.Modal.getInstance(document.getElementById('appModal')).hide();
+                                 openStatusModal(
+                                     ${application.id},
+                                     '${candidate.name.replace(/'/g, "\\'")}',
+                                     '${job.title.replace(/'/g, "\\'")}',
+                                     '${candidate.email}')"
+                        class="btn-wb-primary px-4">
+                    <i class="bi bi-pencil-square"></i> Update Status
+                </button>
+            </div>
+        `;
+    }
+
+    // ── Open Status Modal ─────────────────
+    function openStatusModal(id, candidateName, jobTitle, email) {
+        selectedStatus = "";
+
+        document.getElementById("statusAppId").value           = id;
+        document.getElementById("statusCandidateName").textContent = candidateName;
+        document.getElementById("statusJobTitle").textContent  = jobTitle;
+        document.getElementById("statusAvatar").textContent    = candidateName.charAt(0).toUpperCase();
+        document.getElementById("adminNote").value             = "";
+        document.getElementById("interviewDate").value         = "";
+        document.getElementById("inviteMessage").value         = "";
+        document.getElementById("interviewFields").style.display = "none";
+        document.getElementById("statusAlert").className       = "wb-alert";
+        document.getElementById("statusModalTitle").textContent = `Update: ${candidateName}`;
+
+        // Reset status options
+        document.querySelectorAll(".status-option").forEach(o => {
+            o.style.borderColor  = "var(--border)";
+            o.style.background   = "transparent";
+        });
+
+        new bootstrap.Modal(document.getElementById("statusModal")).show();
+    }
+
+    // ── Select Status ─────────────────────
+    function selectStatus(status, el) {
+        selectedStatus = status;
+
+        // Reset all
+        document.querySelectorAll(".status-option").forEach(o => {
+            o.style.borderColor = "var(--border)";
+            o.style.background  = "transparent";
+        });
+
+        // Highlight selected
+        el.style.borderColor = "var(--primary)";
+        el.style.background  = "var(--primary-light)";
+
+        // Show interview fields if invited
+        document.getElementById("interviewFields").style.display =
+            status === "invited" ? "block" : "none";
+    }
+
+    // ── Submit Status ─────────────────────
+    async function submitStatus() {
+        if (!selectedStatus) {
+            showAlert("statusAlert", "Please select a status", "danger");
+            return;
+        }
+
+        const id            = document.getElementById("statusAppId").value;
+        const adminNote     = document.getElementById("adminNote").value.trim();
+        const interviewDate = document.getElementById("interviewDate").value;
+        const inviteMessage = document.getElementById("inviteMessage").value.trim();
+        const btn           = document.getElementById("submitStatusBtn");
+
+        const payload = { status: selectedStatus };
+        if (adminNote) payload.admin_note = adminNote;
+
+        if (selectedStatus === "invited") {
+            if (interviewDate) {
+                // Convert datetime-local to MySQL format
+                payload.interview_date = interviewDate.replace("T", " ") + ":00";
+            }
+            if (inviteMessage) payload.message = inviteMessage;
+        }
+
+        btn.innerHTML = '<span class="wb-spinner"></span> Updating...';
+        btn.disabled  = true;
+
+        const { data } = await apiRequest(
+            `/applications/status?id=${id}`,
+            "PUT",
+            payload,
+            true
+        );
+
+        btn.innerHTML = "Update Status";
+        btn.disabled  = false;
+
+        if (!data.success) {
+            showAlert("statusAlert", data.message, "danger");
+            return;
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById("statusModal")).hide();
+
+        const emailNote = data.data.email_sent
+            ? " Email notification sent! ✅"
+            : "";
+
+        showAlert("pageAlert", `${data.message}.${emailNote}`, "success");
+
+        loadSummary();
+        loadApplications(currentPage);
+    }
+
+    // ── Filter by Status (card click) ─────
+    function filterByStatus(status) {
+        document.getElementById("filterStatus").value = status;
+        loadApplications(1);
+    }
+
+    // ── Pagination ────────────────────────
+    function renderPagination(totalPages, current) {
+        if (totalPages <= 1) {
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+        let html = "";
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="wb-page-btn ${i === current ? "active" : ""}"
+                             onclick="loadApplications(${i})">${i}</button>`;
+        }
+        document.getElementById("pagination").innerHTML = html;
+    }
+
+</script>
+<div class="wb-mobile-nav">
+    <a href="dashboard.html">
+        <i class="bi bi-grid"></i> Dashboard
+    </a>
+    <a href="jobs.html">
+        <i class="bi bi-briefcase"></i> Jobs
+    </a>
+    <a href="applications.html" class="active">
+        <i class="bi bi-file-text"></i> Applications
+    </a>
+    <a href="../index.html">
+        <i class="bi bi-eye"></i> View Site
+    </a>
+</div>
+</body>
+</html>

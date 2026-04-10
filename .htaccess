@@ -1,0 +1,46 @@
+Options -Indexes
+RewriteEngine On
+
+# ─────────────────────────────────────────
+# CORS Headers
+# ─────────────────────────────────────────
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+# Handle OPTIONS preflight request
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# ─────────────────────────────────────────
+# AUTH ROUTES
+# ─────────────────────────────────────────
+RewriteRule ^api/auth/register/?$   api/auth/register.php   [L,QSA]
+RewriteRule ^api/auth/login/?$      api/auth/login.php      [L,QSA]
+
+# ─────────────────────────────────────────
+# JOBS ROUTES
+# ─────────────────────────────────────────
+RewriteRule ^api/jobs/?$            api/jobs/index.php      [L,QSA]
+RewriteRule ^api/jobs/single/?$     api/jobs/single.php     [L,QSA]
+RewriteRule ^api/jobs/create/?$     api/jobs/create.php     [L,QSA]
+RewriteRule ^api/jobs/update/?$     api/jobs/update.php     [L,QSA]
+RewriteRule ^api/jobs/delete/?$     api/jobs/delete.php     [L,QSA]
+
+# ─────────────────────────────────────────
+# APPLICATIONS ROUTES
+# ─────────────────────────────────────────
+RewriteRule ^api/applications/apply/?$          api/applications/apply.php          [L,QSA]
+RewriteRule ^api/applications/my/?$             api/applications/my_applications.php [L,QSA]
+RewriteRule ^api/applications/?$                api/applications/list.php            [L,QSA]
+RewriteRule ^api/applications/status/?$         api/applications/update_status.php   [L,QSA]
+RewriteRule ^api/applications/single/?$         api/applications/single.php          [L,QSA]
+
+# ─────────────────────────────────────────
+# ADMIN ROUTES
+# ─────────────────────────────────────────
+RewriteRule ^api/admin/dashboard/?$   api/admin/dashboard.php   [L,QSA]
+
+# User Profile Routes
+RewriteRule ^api/user/profile/?$         api/user/profile.php         [L,QSA]
+RewriteRule ^api/user/update-profile/?$  api/user/update_profile.php  [L,QSA]

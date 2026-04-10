@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
+    <title>Jobs - candidate | Wooble</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { background: var(--bg-light); }
+
+        .wb-sidebar {
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-user {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--primary-light);
+        }
+
+        .sidebar-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav { padding: 12px 0; flex: 1; }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 24px;
+            color: var(--text-mid);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .sidebar-nav a.active { font-weight: 700; }
+
+        .sidebar-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .wb-main { margin-left: 240px; min-height: 100vh; }
+
+        .wb-topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .app-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            transition: all 0.2s;
+        }
+
+        .app-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .app-card .job-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .app-card .company {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        @media(max-width:768px) {
+            .wb-sidebar { display: none; }
+            .wb-main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="wb-sidebar">
+    <div class="sidebar-brand">
+        <a href="../index.html" style="text-decoration:none;">
+            <span style="font-size:18px;font-weight:800;color:var(--primary);">
+                Wooble Jobs
+            </span>
+        </a>
+    </div>
+
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" id="sidebarAvatar">J</div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:var(--text-dark);"
+                     id="sidebarName">...</div>
+                <div style="font-size:12px;color:var(--primary);font-weight:600;">
+                    Candidate
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a id="navOverview" class="active" onclick="switchSection('overview')">
+            <i class="bi bi-grid"></i> Overview
+        </a>
+        <a id="navApplications" onclick="switchSection('applications')" href="#applications">
+            <i class="bi bi-file-text"></i> My Applications
+        </a>
+        <a href="profile.html">
+            <i class="bi bi-person"></i> My Profile
+        </a>
+        <a href="../index.html">
+            <i class="bi bi-briefcase"></i> Browse Jobs
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <button onclick="Auth.logout()"
+                class="btn-wb-outline w-100"
+                style="font-size:13px;padding:9px;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="wb-main">
+
+    <!-- Topbar -->
+    <div class="wb-topbar">
+        <div>
+            <h5 style="margin:0;font-weight:700;" id="topbarTitle">Overview</h5>
+            <p class="text-muted mb-0" style="font-size:13px;"
+               id="topbarSub">Welcome back!</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="wb-badge wb-badge-blue">👤 Candidate</span>
+            <a href="../index.html" class="btn-wb-primary"
+               style="font-size:13px;padding:8px 16px;">
+                <i class="bi bi-briefcase"></i> Browse Jobs
+            </a>
+        </div>
+    </div>
+
+    <div style="padding:32px;">
+
+        <!-- Alert -->
+        <div id="pageAlert" class="wb-alert"></div>
+
+        <!-- OVERVIEW SECTION -->
+        <div id="section-overview">
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="wb-stat-card">
+                        <div class="icon icon-blue">📋</div>
+                        <div>
+                            <div class="stat-number" id="statTotal">—</div>
+                            <div class="stat-label">Total Applied</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="wb-stat-card">
+                        <div class="icon icon-yellow">🕐</div>
+                        <div>
+                            <div class="stat-number" id="statPending">—</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="wb-stat-card">
+                        <div class="icon icon-blue">⭐</div>
+                        <div>
+                            <div class="stat-number" id="statShortlisted">—</div>
+                            <div class="stat-label">Shortlisted</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="wb-stat-card">
+                        <div class="icon icon-green">📅</div>
+                        <div>
+                            <div class="stat-number" id="statInvited">—</div>
+                            <div class="stat-label">Invited</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Applications -->
+            <div class="app-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 style="font-weight:700;margin:0;">Recent Applications</h6>
+                    <button class="btn-wb-outline"
+                            style="font-size:13px;padding:6px 16px;"
+                            onclick="switchSection('applications')">
+                        View All →
+                    </button>
+                </div>
+                <div id="recentApps">
+                    <div class="text-center py-4 text-muted">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="app-card">
+                <h6 style="font-weight:700;margin-bottom:16px;">
+                    💡 Tips to Get Hired Faster
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div style="padding:16px;background:var(--primary-light);
+                                    border-radius:var(--radius-sm);">
+                            <div style="font-size:24px;margin-bottom:8px;">📝</div>
+                            <div style="font-size:13px;font-weight:700;margin-bottom:4px;">
+                                Write a Cover Letter
+                            </div>
+                            <div style="font-size:12px;color:var(--text-light);">
+                                Applications with cover letters get 3x more responses
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div style="padding:16px;background:#dcfce7;
+                                    border-radius:var(--radius-sm);">
+                            <div style="font-size:24px;margin-bottom:8px;">📄</div>
+                            <div style="font-size:13px;font-weight:700;margin-bottom:4px;">
+                                Upload Your Resume
+                            </div>
+                            <div style="font-size:12px;color:var(--text-light);">
+                                A good resume increases your chances by 60%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div style="padding:16px;background:#fef9c3;
+                                    border-radius:var(--radius-sm);">
+                            <div style="font-size:24px;margin-bottom:8px;">🎯</div>
+                            <div style="font-size:13px;font-weight:700;margin-bottom:4px;">
+                                Apply to Matching Jobs
+                            </div>
+                            <div style="font-size:12px;color:var(--text-light);">
+                                Apply to jobs that match your skills and experience
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- APPLICATIONS SECTION -->
+        <div id="section-applications" style="display:none;">
+
+            <!-- Filter Bar -->
+            <div class="app-card mb-4">
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <span style="font-size:14px;font-weight:600;">Filter:</span>
+                    <button class="wb-badge wb-badge-gray filter-btn"
+                            onclick="filterCandidateApps('', this)"
+                            style="cursor:pointer;padding:8px 16px;
+                                   outline:2px solid var(--primary);">
+                        All
+                    </button>
+                    <button class="wb-badge wb-badge-yellow filter-btn"
+                            onclick="filterCandidateApps('pending', this)"
+                            style="cursor:pointer;padding:8px 16px;">
+                        🕐 Pending
+                    </button>
+                    <button class="wb-badge wb-badge-blue filter-btn"
+                            onclick="filterCandidateApps('shortlisted', this)"
+                            style="cursor:pointer;padding:8px 16px;">
+                        ⭐ Shortlisted
+                    </button>
+                    <button class="wb-badge wb-badge-green filter-btn"
+                            onclick="filterCandidateApps('invited', this)"
+                            style="cursor:pointer;padding:8px 16px;">
+                        📅 Invited
+                    </button>
+                    <button class="wb-badge wb-badge-red filter-btn"
+                            onclick="filterCandidateApps('rejected', this)"
+                            style="cursor:pointer;padding:8px 16px;">
+                        ❌ Rejected
+                    </button>
+                </div>
+            </div>
+
+            <div id="appsList">
+                <div class="text-center py-5 text-muted">Loading...</div>
+            </div>
+
+            <div class="wb-pagination" id="appsPagination"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Application Detail Modal -->
+<div class="modal fade" id="appDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content"
+             style="border-radius:var(--radius-md);border:none;">
+            <div class="modal-header wb-modal-header">
+                <h5 class="modal-title">Application Detail</h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="modalContent">
+                Loading...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/applications.js"></script>
+<script>
+
+// ── Switch Section ────────────────────────
+function switchSection(name) {
+    // Hide all sections
+    document.getElementById("section-overview").style.display     = "none";
+    document.getElementById("section-applications").style.display = "none";
+
+    // Show selected
+    document.getElementById(`section-${name}`).style.display = "block";
+
+    // Update sidebar active state
+    document.querySelectorAll(".sidebar-nav a").forEach(a => {
+        a.classList.remove("active");
+    });
+    const navEl = document.getElementById(`nav${name.charAt(0).toUpperCase() + name.slice(1)}`);
+    if (navEl) navEl.classList.add("active");
+
+    // Update topbar
+    const titles = {
+        overview:     { title: "Overview",        sub: "Your application summary" },
+        applications: { title: "My Applications", sub: "Track all your applications" }
+    };
+    document.getElementById("topbarTitle").textContent = titles[name]?.title || name;
+    document.getElementById("topbarSub").textContent   = titles[name]?.sub   || "";
+
+    // ✅ FIX: Update URL hash cleanly
+    if (name === "overview") {
+        history.replaceState(null, "", window.location.pathname); // removes #applications
+    } else {
+        history.replaceState(null, "", `#${name}`);
+    }
+
+    document.getElementById("mobileNavOverview").classList.toggle("active", name === "overview");
+    document.getElementById("mobileNavApplications").classList.toggle("active", name === "applications");
+}
+
+// ── On Load ───────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireAuth("candidate")) return;
+
+    // Set user from localStorage immediately
+    const user = Auth.getUser();
+    if (user) {
+        document.getElementById("sidebarName").textContent   = user.name;
+        document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+        document.getElementById("topbarSub").textContent     = `Welcome back, ${user.name}!`;
+    }
+
+    // Load data
+    loadCandidateOverview();
+    loadCandidateApplications();
+
+    const hash = window.location.hash.replace("#", "");
+    if (hash === "applications") {
+        switchSection("applications");
+    }
+});
+
+</script>
+<div class="wb-mobile-nav">
+    <a id="mobileNavOverview" href="dashboard.html" class="active">
+        <i class="bi bi-grid"></i> Overview
+    </a>
+    <a id="mobileNavApplications" href="#" onclick="switchSection('applications')">
+        <i class="bi bi-file-text"></i> Applications
+    </a>
+    <a href="profile.html">
+        <i class="bi bi-person"></i> Profile
+    </a>
+    <a href="../index.html">
+        <i class="bi bi-briefcase"></i> Jobs
+    </a>
+</div>
+</body>
+</html>

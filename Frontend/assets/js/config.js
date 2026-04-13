@@ -2,8 +2,7 @@
 // WOOBLE JOBS — GLOBAL CONFIG & HELPERS
 // ============================================
 
-const API_BASE = "http://localhost/wooble-jobapplication/api";
-const FRONTEND_BASE = "http://localhost/wooble-jobapplication"; 
+const API_BASE = "http://localhost/api";
 
 // ── Token Helpers ─────────────────────────
 const Auth = {
@@ -30,7 +29,7 @@ const Auth = {
     logout: () => {
         Auth.removeToken();
         Auth.removeUser();
-        window.location.href = "/wooble-jobapplication/frontend/login.html";
+        window.location.href = "/frontend/login.html";
     }
 };
 
@@ -94,10 +93,10 @@ function statusBadge(status) {
     const map = {
         pending:     { cls: "wb-badge-yellow", icon: "🕐", label: "Pending" },
         shortlisted: { cls: "wb-badge-blue",   icon: "⭐", label: "Shortlisted" },
-        invited:     { cls: "wb-badge-green",   icon: "📅", label: "Invited" },
-        rejected:    { cls: "wb-badge-red",     icon: "❌", label: "Rejected" },
-        active:      { cls: "wb-badge-green",   icon: "✅", label: "Active" },
-        closed:      { cls: "wb-badge-gray",    icon: "🔒", label: "Closed" }
+        invited:     { cls: "wb-badge-green",  icon: "📅", label: "Invited" },
+        rejected:    { cls: "wb-badge-red",    icon: "❌", label: "Rejected" },
+        active:      { cls: "wb-badge-green",  icon: "✅", label: "Active" },
+        closed:      { cls: "wb-badge-gray",   icon: "🔒", label: "Closed" }
     };
     const s = map[status] || { cls: "wb-badge-gray", icon: "•", label: status };
     return `<span class="wb-badge ${s.cls}">${s.icon} ${s.label}</span>`;
@@ -107,9 +106,9 @@ function statusBadge(status) {
 function jobTypeBadge(type) {
     const map = {
         "full-time": { cls: "wb-badge-blue",   label: "Full Time" },
-        "part-time": { cls: "wb-badge-yellow",  label: "Part Time" },
-        "remote":    { cls: "wb-badge-green",   label: "Remote" },
-        "contract":  { cls: "wb-badge-purple",  label: "Contract" }
+        "part-time": { cls: "wb-badge-yellow", label: "Part Time" },
+        "remote":    { cls: "wb-badge-green",  label: "Remote" },
+        "contract":  { cls: "wb-badge-purple", label: "Contract" }
     };
     const t = map[type] || { cls: "wb-badge-gray", label: type };
     return `<span class="wb-badge ${t.cls}">${t.label}</span>`;
@@ -118,15 +117,15 @@ function jobTypeBadge(type) {
 // ── Redirect if not logged in ─────────────
 function requireAuth(role = null) {
     if (!Auth.isLoggedIn()) {
-        window.location.href = "/wooble-jobapplication/frontend/login.html";
+        window.location.href = "/frontend/login.html";
         return false;
     }
     if (role === "admin" && !Auth.isAdmin()) {
-        window.location.href = "/wooble-jobapplication/frontend/login.html";
+        window.location.href = "/frontend/login.html";
         return false;
     }
     if (role === "candidate" && !Auth.isCandidate()) {
-        window.location.href = "/wooble-jobapplication/frontend/login.html";
+        window.location.href = "/frontend/login.html";
         return false;
     }
     return true;
@@ -142,31 +141,36 @@ function updateNavbar() {
     const dashLink    = document.getElementById("dashboardLink");
 
     if (user && Auth.isLoggedIn()) {
+
         // Hide guest nav
         if (guestNav) guestNav.style.cssText = "display:none!important;";
 
         // Show user nav
-        if (userNav)  userNav.style.cssText  = "display:flex!important;";
+        if (userNav) userNav.style.cssText = "display:flex!important;";
 
-        // Set username
-        if (userName) userName.textContent = user.name;
+        // Set username — clicking goes to profile
+        if (userName) {
+            userName.textContent  = user.name;
+            userName.style.cursor = "pointer";
+            userName.onclick      = () => {
+                window.location.href = Auth.isAdmin()
+                    ? "/frontend/admin/dashboard.html"
+                    : "/frontend/candidate/profile.html";
+            };
+        }
 
         // Set profile link
-       if (userName) {
-    userName.textContent = user.name;
-    userName.style.cursor = "pointer";
-    userName.onclick = () => {
-        window.location.href = Auth.isAdmin()
-            ? "/wooble-jobapplication/frontend/admin/dashboard.html"
-            : "/wooble-jobapplication/frontend/candidate/profile.html";
-    };
-}
+        if (profileLink) {
+            profileLink.href = Auth.isAdmin()
+                ? "/frontend/admin/dashboard.html"
+                : "/frontend/candidate/profile.html";
+        }
 
         // Set dashboard link
         if (dashLink) {
             dashLink.href = Auth.isAdmin()
-                ? "admin/dashboard.html"
-                : "candidate/dashboard.html";
+                ? "/frontend/admin/dashboard.html"
+                : "/frontend/candidate/dashboard.html";
         }
 
     } else {
@@ -174,7 +178,7 @@ function updateNavbar() {
         if (guestNav) guestNav.style.cssText = "display:flex!important;";
 
         // Hide user nav
-        if (userNav)  userNav.style.cssText  = "display:flex!important; margin-right:16px;";
+        if (userNav) userNav.style.cssText = "display:none!important;";
     }
 }
 

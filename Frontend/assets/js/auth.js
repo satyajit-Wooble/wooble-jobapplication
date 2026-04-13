@@ -161,16 +161,6 @@ function selectRole(role, el) {
     el.classList.add("selected");
 }
 
-// ── Fill Demo Credentials ──────────────────
-function fillDemo(role) {
-    if (role === "admin") {
-        document.getElementById("email").value    = "admin@wooble.com";
-        document.getElementById("password").value = "admin123";
-    } else {
-        document.getElementById("email").value    = "john@example.com";
-        document.getElementById("password").value = "123456";
-    }
-}
 
 // ── Redirect if Already Logged In ─────────
 // ── Redirect if Already Logged In ─────────

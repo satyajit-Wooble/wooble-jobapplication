@@ -88,24 +88,6 @@
             </span>
         </div>
 
-        <!-- Demo accounts -->
-        <div class="row g-2 mb-4">
-            <div class="col-6">
-                <button onclick="fillDemo('admin')"
-                        class="btn-wb-outline w-100"
-                        style="font-size:13px;padding:8px;">
-                    🔑 Demo Admin
-                </button>
-            </div>
-            <div class="col-6">
-                <button onclick="fillDemo('candidate')"
-                        class="btn-wb-outline w-100"
-                        style="font-size:13px;padding:8px;">
-                    👤 Demo Candidate
-                </button>
-            </div>
-        </div>
-
         <p class="text-center mb-0" style="font-size:14px;color:var(--text-light);">
             Don't have an account?
             <a href="register.html" class="fw-600">Create one free</a>
@@ -175,17 +157,6 @@
         } else {
             input.type    = "password";
             btn.innerHTML = '<i class="bi bi-eye"></i>';
-        }
-    }
-
-    // ── Fill demo credentials ─────────────
-    function fillDemo(role) {
-        if (role === "admin") {
-            document.getElementById("email").value    = "admin@wooble.com";
-            document.getElementById("password").value = "admin123";
-        } else {
-            document.getElementById("email").value    = "john@example.com";
-            document.getElementById("password").value = "123456";
         }
     }
 

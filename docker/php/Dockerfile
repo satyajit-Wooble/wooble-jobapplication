@@ -45,19 +45,17 @@ RUN if [ -f "composer.json" ]; then \
     composer install --no-interaction --optimize-autoloader --no-dev; \
 fi
 
+# ── Create uploads directory ──────────────
+RUN mkdir -p /var/www/html/uploads/resumes
+
 # ── Set Permissions ───────────────────────
 RUN chown -R www-data:www-data /var/www/html \
     && find /var/www/html -type d -exec chmod 755 {} \; \
     && find /var/www/html -type f -exec chmod 644 {} \; \
     && chmod -R 777 /var/www/html/uploads
 
-# ── Create uploads directory ──────────────
-RUN mkdir -p /var/www/html/uploads/resumes \
-    && chown -R www-data:www-data /var/www/html/uploads \
-    && chmod -R 777 /var/www/html/uploads
-
 # ── Apache Config ─────────────────────────
-COPY docker/php/apache.conf /etc/apache2/sites-enabled/000-default.conf
+COPY apache.conf /etc/apache2/sites-enabled/000-default.conf
 
 # ── Expose Port ───────────────────────────
 EXPOSE 80

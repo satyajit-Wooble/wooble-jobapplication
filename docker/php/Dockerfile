@@ -55,7 +55,7 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 777 /var/www/html/uploads
 
 # ── Apache Config ─────────────────────────
-COPY apache.conf /etc/apache2/sites-enabled/000-default.conf
+COPY docker/php/apache.conf /etc/apache2/sites-enabled/000-default.conf
 
 # ── Expose Port ───────────────────────────
 EXPOSE 80

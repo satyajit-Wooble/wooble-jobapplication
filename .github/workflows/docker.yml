@@ -2,8 +2,8 @@ name: Docker Build and Push
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
   docker:
@@ -19,8 +19,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Extract version
+        id: vars
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
       - name: Build Docker Image
-        run: docker build -t satyajitwooble/wooble-jobapplication:latest -f docker/php/Dockerfile .
+        run: docker build -t satyajitwooble/wooble-jobapplication:$VERSION -f docker/php/Dockerfile .
 
       - name: Push Docker Image
-        run: docker push satyajitwooble/wooble-jobapplication:latest
+        run: docker push satyajitwooble/wooble-jobapplication:$VERSION

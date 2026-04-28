@@ -14,8 +14,8 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
 require_once __DIR__ . "/../config/database.php";
 require_once __DIR__ . "/../middleware/auth.php";
 
-// --- Admin only ---
-$admin = requireAdmin();
+// --- Employer or Company ---
+$user = requireEmployerOrCompany();
 
 $db = (new Database())->getConnection();
 
@@ -26,8 +26,15 @@ $page    = max(1, (int)($_GET["page"] ?? 1));
 $limit   = 10;
 $offset  = ($page - 1) * $limit;
 
-$where  = ["j.admin_id = :admin_id"];
-$params = [":admin_id" => $admin["user_id"]];
+// Company sees ALL applications
+// Employer sees only their own job applications
+$params = [];
+if ($user["role"] === "company") {
+    $where = ["1=1"];
+} else {
+    $where  = ["j.posted_by = :posted_by"];
+    $params = [":posted_by" => $user["user_id"]];
+}
 
 if ($status) {
     $validStatuses = ["pending", "shortlisted", "invited", "rejected"];
@@ -100,15 +107,25 @@ foreach ($params as $key => $value) {
 $stmt->execute();
 $applications = $stmt->fetchAll();
 
-// --- Status summary ---
-$summaryStmt = $db->prepare("
-    SELECT a.status, COUNT(*) as count
-    FROM applications a
-    JOIN jobs j ON a.job_id = j.id
-    WHERE j.admin_id = :admin_id
-    GROUP BY a.status
-");
-$summaryStmt->execute([":admin_id" => $admin["user_id"]]);
+if ($user["role"] === "company") {
+    $summaryStmt = $db->prepare("
+        SELECT a.status, COUNT(*) as count
+        FROM applications a
+        JOIN jobs j ON a.job_id = j.id
+        WHERE 1=1
+        GROUP BY a.status
+    ");
+    $summaryStmt->execute([]);
+} else {
+    $summaryStmt = $db->prepare("
+        SELECT a.status, COUNT(*) as count
+        FROM applications a
+        JOIN jobs j ON a.job_id = j.id
+        WHERE j.posted_by = :posted_by
+        GROUP BY a.status
+    ");
+    $summaryStmt->execute([":posted_by" => $user["user_id"]]);
+}
 $summaryRows = $summaryStmt->fetchAll();
 
 $summary = [

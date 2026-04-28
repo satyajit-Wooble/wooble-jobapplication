@@ -12,37 +12,52 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
 }
 
 require_once __DIR__ . "/../config/database.php";
+require_once __DIR__ . "/../middleware/auth.php";
+
+// --- Employer or Company ---
+$user = requireEmployerOrCompany();
 
 $db = (new Database())->getConnection();
 
 // --- Optional Filters ---
-$search   = $_GET["search"]   ?? "";
-$type     = $_GET["type"]     ?? "";
-$location = $_GET["location"] ?? "";
-$page     = max(1, (int)($_GET["page"] ?? 1));
-$limit    = 10;
-$offset   = ($page - 1) * $limit;
+$search = $_GET["search"] ?? "";
+$status = $_GET["status"] ?? "";
+$type   = $_GET["type"]   ?? "";
+$page   = max(1, (int)($_GET["page"] ?? 1));
+$limit  = 10;
+$offset = ($page - 1) * $limit;
 
-$where  = ["j.status = 'active'"];
-$params = [];
+// Company sees ALL jobs
+// Employer sees only their own jobs
+if ($user["role"] === "company") {
+    $where  = [];
+    $params = [];
+} else {
+    $where  = ["j.posted_by = :posted_by"];
+    $params = [":posted_by" => $user["user_id"]];
+}
 
 if ($search) {
-    $where[]           = "(j.title LIKE :search OR j.company LIKE :search OR j.description LIKE :search)";
+    $where[]           = "(j.title LIKE :search OR j.company LIKE :search)";
     $params[":search"] = "%{$search}%";
 }
+if ($status) {
+    $where[]          = "j.status = :status";
+    $params[":status"] = $status;
+}
 if ($type) {
-    $where[]         = "j.job_type = :type";
+    $where[]        = "j.job_type = :type";
     $params[":type"] = $type;
 }
-if ($location) {
-    $where[]             = "j.location LIKE :location";
-    $params[":location"] = "%{$location}%";
-}
 
-$whereSQL = implode(" AND ", $where);
+$whereSQL = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
 
 // --- Count total ---
-$countStmt = $db->prepare("SELECT COUNT(*) as total FROM jobs j WHERE {$whereSQL}");
+$countStmt = $db->prepare("
+    SELECT COUNT(*) as total 
+    FROM jobs j 
+    {$whereSQL}
+");
 $countStmt->execute($params);
 $total = (int)$countStmt->fetch()["total"];
 
@@ -51,27 +66,17 @@ $params[":limit"]  = $limit;
 $params[":offset"] = $offset;
 
 $stmt = $db->prepare("
-    SELECT 
-        j.id,
-        j.title,
-        j.company,
-        j.location,
-        j.job_type,
-        j.salary_min,
-        j.salary_max,
-        j.description,
-        j.requirements,
-        j.status,
-        j.created_at,
-        u.name AS posted_by
+    SELECT
+        j.*,
+        u.name AS posted_by_name,
+        (SELECT COUNT(*) FROM applications a WHERE a.job_id = j.id) AS total_applications
     FROM jobs j
     JOIN users u ON j.posted_by = u.id
-    WHERE {$whereSQL}
+    {$whereSQL}
     ORDER BY j.created_at DESC
     LIMIT :limit OFFSET :offset
 ");
 
-// Bind integer params separately for LIMIT/OFFSET
 foreach ($params as $key => $value) {
     if ($key === ":limit" || $key === ":offset") {
         $stmt->bindValue($key, $value, PDO::PARAM_INT);

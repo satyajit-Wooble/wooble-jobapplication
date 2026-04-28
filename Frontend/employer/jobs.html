@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Auth Guard -->
+    <script>
+        (function() {
+            const token = localStorage.getItem("wooble_token");
+            const user  = JSON.parse(localStorage.getItem("wooble_user") || "null");
+            if (!token || !user || user.role !== "employer") {
+                localStorage.removeItem("wooble_token");
+                localStorage.removeItem("wooble_user");
+                window.location.replace("/frontend/login.html");
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
-    <title>Jobs - Admin | Wooble</title>
+    <title>Employers Jobs || Wooble Jobs</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -67,7 +79,7 @@
             border-right: 3px solid var(--accent);
         }
 
-        .sidebar-nav a.active { font-weight: 700; color: var(--white); }
+        .sidebar-nav a.active { font-weight: 700; }
 
         .sidebar-footer {
             padding: 16px 24px;
@@ -110,24 +122,26 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     SIDEBAR
-══════════════════════════════════════════ -->
+<!-- ══ SIDEBAR ══════════════════════════════ -->
 <div class="wb-sidebar">
     <div class="sidebar-brand">
         <a href="../index.html" style="text-decoration:none;">
-            <span style="font-size:18px;font-weight:800;color:var(--white);"> Wooble Jobs</span>
+            <span style="font-size:18px;font-weight:800;color:var(--white);">
+                💼 Wooble Jobs
+            </span>
         </a>
-        <div style="font-size:11px;color:#64748b;margin-top:4px;">Admin Panel</div>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">
+            Employer Panel
+        </div>
     </div>
 
     <div class="sidebar-user">
         <div class="d-flex align-items-center gap-3">
-            <div class="avatar" id="sidebarAvatar">A</div>
+            <div class="avatar" id="sidebarAvatar">E</div>
             <div>
                 <div style="font-size:14px;font-weight:700;color:var(--white);"
                      id="sidebarName">Loading...</div>
-                <div style="font-size:12px;color:#64748b;">Administrator</div>
+                <div style="font-size:12px;color:#64748b;">Employer</div>
             </div>
         </div>
     </div>
@@ -137,7 +151,7 @@
             <i class="bi bi-grid"></i> Dashboard
         </a>
         <a href="jobs.html" class="active">
-            <i class="bi bi-briefcase"></i> Manage Jobs
+            <i class="bi bi-briefcase"></i> My Jobs
         </a>
         <a href="applications.html">
             <i class="bi bi-file-text"></i> Applications
@@ -149,25 +163,25 @@
 
     <div class="sidebar-footer">
         <button onclick="Auth.logout()"
-                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
-                       color:#94a3b8;border-radius:var(--radius-pill);padding:9px 16px;
-                       font-size:13px;width:100%;cursor:pointer;">
+                style="background:rgba(255,255,255,0.08);
+                       border:1px solid rgba(255,255,255,0.15);
+                       color:#94a3b8;border-radius:var(--radius-pill);
+                       padding:9px 16px;font-size:13px;width:100%;
+                       cursor:pointer;">
             <i class="bi bi-box-arrow-left"></i> Logout
         </button>
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MAIN CONTENT
-══════════════════════════════════════════ -->
+<!-- ══ MAIN ══════════════════════════════════ -->
 <div class="wb-main">
 
     <!-- Topbar -->
     <div class="wb-topbar">
         <div>
-            <h5 style="margin:0;font-weight:700;">Manage Jobs</h5>
+            <h5 style="margin:0;font-weight:700;">My Jobs</h5>
             <p class="text-muted mb-0" style="font-size:13px;">
-                Create, edit and manage your job postings
+                Manage your job postings
             </p>
         </div>
         <button class="btn-wb-primary" onclick="openCreateModal()">
@@ -185,16 +199,20 @@
         <div class="wb-filter-bar d-flex flex-wrap gap-3 align-items-center mb-4">
             <div class="d-flex align-items-center gap-2 flex-grow-1">
                 <i class="bi bi-search text-muted"></i>
-                <input type="text" id="searchJobs" class="form-control border-0 shadow-none"
-                       placeholder="Search jobs..." onkeyup="debounceSearch()"
+                <input type="text" id="searchJobs"
+                       class="form-control border-0 shadow-none"
+                       placeholder="Search jobs..."
+                       onkeyup="debounceSearch()"
                        style="background:transparent;">
             </div>
-            <select id="filterStatus" class="form-select w-auto" onchange="loadJobs()">
+            <select id="filterStatus" class="form-select w-auto"
+                    onchange="loadJobs()">
                 <option value="">All Status</option>
                 <option value="active">Active</option>
                 <option value="closed">Closed</option>
             </select>
-            <select id="filterType" class="form-select w-auto" onchange="loadJobs()">
+            <select id="filterType" class="form-select w-auto"
+                    onchange="loadJobs()">
                 <option value="">All Types</option>
                 <option value="full-time">Full Time</option>
                 <option value="part-time">Part Time</option>
@@ -203,17 +221,18 @@
             </select>
         </div>
 
-        <!-- Jobs Count -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <p class="text-muted mb-0" style="font-size:14px;" id="jobCount">Loading...</p>
-        </div>
+        <!-- Count -->
+        <p class="text-muted mb-3" style="font-size:14px;"
+           id="jobCount">Loading...</p>
 
         <!-- Jobs List -->
         <div id="jobsList">
             <div class="text-center py-5 text-muted">
-                <div class="wb-spinner" style="border-color:var(--border);
-                     border-top-color:var(--primary);width:32px;height:32px;
-                     border-width:3px;"></div>
+                <div class="wb-spinner"
+                     style="border-color:var(--border);
+                            border-top-color:var(--primary);
+                            width:32px;height:32px;border-width:3px;">
+                </div>
                 <p class="mt-3">Loading jobs...</p>
             </div>
         </div>
@@ -224,43 +243,43 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     CREATE / EDIT JOB MODAL
-══════════════════════════════════════════ -->
+<!-- ══ CREATE/EDIT MODAL ═════════════════════ -->
 <div class="modal fade" id="jobModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border-radius:var(--radius-md);border:none;">
+        <div class="modal-content"
+             style="border-radius:var(--radius-md);border:none;">
             <div class="modal-header wb-modal-header">
                 <h5 class="modal-title" id="modalTitle">Post New Job</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-
                 <div id="modalAlert" class="wb-alert"></div>
-
                 <form id="jobForm" onsubmit="handleJobSubmit(event)">
                     <input type="hidden" id="jobId">
-
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="wb-form-group">
                                 <label>Job Title *</label>
-                                <input type="text" id="fTitle" class="wb-form-control"
+                                <input type="text" id="fTitle"
+                                       class="wb-form-control"
                                        placeholder="e.g. PHP Developer" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="wb-form-group">
                                 <label>Company Name *</label>
-                                <input type="text" id="fCompany" class="wb-form-control"
-                                       placeholder="e.g. Wooble Tech" required>
+                                <input type="text" id="fCompany"
+                                       class="wb-form-control"
+                                       placeholder="e.g. Tech Corp" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="wb-form-group">
                                 <label>Location *</label>
-                                <input type="text" id="fLocation" class="wb-form-control"
-                                       placeholder="e.g. Bhubaneswar, Odisha" required>
+                                <input type="text" id="fLocation"
+                                       class="wb-form-control"
+                                       placeholder="e.g. Bhubaneswar" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -278,31 +297,37 @@
                         <div class="col-md-6">
                             <div class="wb-form-group">
                                 <label>Min Salary (₹/month)</label>
-                                <input type="number" id="fSalaryMin" class="wb-form-control"
+                                <input type="number" id="fSalaryMin"
+                                       class="wb-form-control"
                                        placeholder="e.g. 25000">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="wb-form-group">
                                 <label>Max Salary (₹/month)</label>
-                                <input type="number" id="fSalaryMax" class="wb-form-control"
+                                <input type="number" id="fSalaryMax"
+                                       class="wb-form-control"
                                        placeholder="e.g. 50000">
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="wb-form-group">
                                 <label>Job Description *</label>
-                                <textarea id="fDescription" class="wb-form-control"
+                                <textarea id="fDescription"
+                                          class="wb-form-control"
                                           rows="4" required
-                                          placeholder="Describe the role, responsibilities..."></textarea>
+                                          placeholder="Describe the role...">
+                                </textarea>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="wb-form-group">
                                 <label>Requirements</label>
-                                <textarea id="fRequirements" class="wb-form-control"
+                                <textarea id="fRequirements"
+                                          class="wb-form-control"
                                           rows="3"
-                                          placeholder="Skills, experience, qualifications..."></textarea>
+                                          placeholder="Skills, experience needed...">
+                                </textarea>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -316,37 +341,35 @@
                         </div>
                     </div>
                 </form>
-
             </div>
-            <div class="modal-footer" style="border-top:1px solid var(--border);">
+            <div class="modal-footer"
+                 style="border-top:1px solid var(--border);">
                 <button type="button" class="btn-wb-outline"
                         data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="jobForm" class="btn-wb-primary px-4"
-                        id="submitJobBtn">
-                    Post Job
-                </button>
+                <button type="submit" form="jobForm"
+                        class="btn-wb-primary px-4"
+                        id="submitJobBtn">Post Job</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     DELETE CONFIRM MODAL
-══════════════════════════════════════════ -->
+<!-- ══ DELETE MODAL ══════════════════════════ -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
-        <div class="modal-content" style="border-radius:var(--radius-md);border:none;">
+        <div class="modal-content"
+             style="border-radius:var(--radius-md);border:none;">
             <div class="modal-body p-4 text-center">
                 <div style="font-size:48px;margin-bottom:16px;">🗑️</div>
                 <h5 style="font-weight:700;">Delete Job?</h5>
-                <p class="text-muted" style="font-size:14px;" id="deleteJobTitle">
-                    Are you sure you want to delete this job?
-                </p>
+                <p class="text-muted" style="font-size:14px;"
+                   id="deleteJobTitle"></p>
                 <div class="d-flex gap-2 justify-content-center mt-3">
-                    <button class="btn-wb-outline" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn-wb-danger" onclick="confirmDelete()" id="confirmDeleteBtn">
-                        Delete
-                    </button>
+                    <button class="btn-wb-outline"
+                            data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn-wb-danger"
+                            onclick="confirmDelete()"
+                            id="confirmDeleteBtn">Delete</button>
                 </div>
             </div>
         </div>
@@ -355,32 +378,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/config.js"></script>
-<script src="../assets/js/applications.js"></script>
 <script>
 
-    // let currentPage    = 1;
-    // let debounceTimer  = null;
-    let deleteJobId    = null;
-    let editMode       = false;
+    let currentPage   = 1;
+    let debounceTimer = null;
+    let deleteJobId   = null;
+    let editMode      = false;
 
-    // ── On Load ───────────────────────────
     document.addEventListener("DOMContentLoaded", () => {
-    if (!requireAuth("admin")) return;
+        if (!requireAuth("employer")) return;
 
-    const user = Auth.getUser();
-    if (user) {
-        document.getElementById("sidebarName").textContent   = user.name;
-        document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
-    }
+        const user = Auth.getUser();
+        if (user) {
+            document.getElementById("sidebarName").textContent   = user.name;
+            document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+        }
 
-    loadJobs();
-
-    // Auto-open Post Job modal if redirected from dashboard
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("action") === "new") {
-        openCreateModal();
-    }
-});
+        loadJobs();
+    });
 
     // ── Load Jobs ─────────────────────────
     async function loadJobs(page = 1) {
@@ -395,8 +410,9 @@
         if (status) query += `&status=${status}`;
         if (type)   query += `&type=${type}`;
 
-        // For admin we fetch all jobs not just active
-        const { data } = await apiRequest(`/jobs${query}`, "GET", null, true);
+        const { data } = await apiRequest(
+            `/jobs/admin-list${query}`, "GET", null, true
+        );
 
         if (!data.success) {
             document.getElementById("jobsList").innerHTML = `
@@ -409,15 +425,17 @@
         }
 
         const { jobs, total, total_pages } = data.data;
-        document.getElementById("jobCount").textContent = `${total} job${total !== 1 ? "s" : ""} found`;
+        document.getElementById("jobCount").textContent =
+            `${total} job${total !== 1 ? "s" : ""} found`;
 
         if (jobs.length === 0) {
             document.getElementById("jobsList").innerHTML = `
                 <div class="wb-empty-state">
                     <div class="icon">💼</div>
-                    <h5>No jobs found</h5>
-                    <p>Post your first job to get started!</p>
-                    <button class="btn-wb-primary mt-3" onclick="openCreateModal()">
+                    <h5>No jobs posted yet</h5>
+                    <p>Post your first job to start receiving applications!</p>
+                    <button class="btn-wb-primary mt-3"
+                            onclick="openCreateModal()">
                         Post New Job
                     </button>
                 </div>`;
@@ -427,27 +445,31 @@
 
         document.getElementById("jobsList").innerHTML = jobs.map(job => `
             <div class="job-row">
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-
-                    <!-- Left -->
+                <div class="d-flex justify-content-between
+                            align-items-start flex-wrap gap-3">
                     <div class="d-flex gap-3 align-items-start">
-                        <div style="width:48px;height:48px;background:var(--primary-light);
-                                    border-radius:var(--radius-sm);display:flex;
-                                    align-items:center;justify-content:center;
-                                    font-weight:800;color:var(--primary);font-size:18px;
+                        <div style="width:48px;height:48px;
+                                    background:var(--primary-light);
+                                    border-radius:var(--radius-sm);
+                                    display:flex;align-items:center;
+                                    justify-content:center;font-weight:800;
+                                    color:var(--primary);font-size:18px;
                                     flex-shrink:0;">
                             ${job.company.charAt(0)}
                         </div>
                         <div>
-                            <div style="font-size:16px;font-weight:700;margin-bottom:4px;">
+                            <div style="font-size:16px;font-weight:700;
+                                        margin-bottom:4px;">
                                 ${job.title}
                             </div>
-                            <div style="font-size:13px;color:var(--text-light);margin-bottom:10px;">
+                            <div style="font-size:13px;color:var(--text-light);
+                                        margin-bottom:10px;">
                                 <i class="bi bi-building"></i> ${job.company}
                                 &nbsp;·&nbsp;
                                 <i class="bi bi-geo-alt"></i> ${job.location}
                                 &nbsp;·&nbsp;
-                                <i class="bi bi-clock"></i> ${formatDate(job.created_at)}
+                                <i class="bi bi-clock"></i>
+                                ${formatDate(job.created_at)}
                             </div>
                             <div class="d-flex flex-wrap gap-2">
                                 ${jobTypeBadge(job.job_type)}
@@ -459,13 +481,14 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Right: Actions -->
                     <div class="d-flex flex-column align-items-end gap-2">
-                        <div style="font-size:22px;font-weight:800;color:var(--primary);">
+                        <div style="font-size:22px;font-weight:800;
+                                    color:var(--primary);">
                             ${job.total_applications || 0}
                         </div>
-                        <div style="font-size:11px;color:var(--text-light);">applicants</div>
+                        <div style="font-size:11px;color:var(--text-light);">
+                            applicants
+                        </div>
                         <div class="d-flex gap-2 mt-1">
                             <a href="../job-detail.html?id=${job.id}"
                                class="btn-wb-outline"
@@ -476,7 +499,7 @@
                             <button onclick="openEditModal(${JSON.stringify(job).replace(/"/g, '&quot;')})"
                                     class="btn-wb-outline"
                                     style="font-size:12px;padding:6px 12px;">
-                                <i class="bi bi-pencil"></i> Edit
+                                <i class="bi bi-pencil"></i>
                             </button>
                             <button onclick="openDeleteModal(${job.id}, '${job.title.replace(/'/g, "\\'")}')"
                                     class="btn-wb-danger"
@@ -485,18 +508,16 @@
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>`).join("");
 
-        // Pagination
         renderPagination(total_pages, page);
     }
 
     // ── Open Create Modal ─────────────────
     function openCreateModal() {
         editMode = false;
-        document.getElementById("modalTitle").textContent  = "Post New Job";
+        document.getElementById("modalTitle").textContent   = "Post New Job";
         document.getElementById("submitJobBtn").textContent = "Post Job";
         document.getElementById("jobId").value             = "";
         document.getElementById("jobForm").reset();
@@ -507,22 +528,19 @@
     // ── Open Edit Modal ───────────────────
     function openEditModal(job) {
         editMode = true;
-        document.getElementById("modalTitle").textContent  = "Edit Job";
+        document.getElementById("modalTitle").textContent   = "Edit Job";
         document.getElementById("submitJobBtn").textContent = "Save Changes";
         document.getElementById("modalAlert").className    = "wb-alert";
-
-        // Fill form
-        document.getElementById("jobId").value          = job.id;
-        document.getElementById("fTitle").value         = job.title;
-        document.getElementById("fCompany").value       = job.company;
-        document.getElementById("fLocation").value      = job.location;
-        document.getElementById("fType").value          = job.job_type;
-        document.getElementById("fSalaryMin").value     = job.salary_min || "";
-        document.getElementById("fSalaryMax").value     = job.salary_max || "";
-        document.getElementById("fDescription").value   = job.description;
-        document.getElementById("fRequirements").value  = job.requirements || "";
-        document.getElementById("fStatus").value        = job.status;
-
+        document.getElementById("jobId").value             = job.id;
+        document.getElementById("fTitle").value            = job.title;
+        document.getElementById("fCompany").value          = job.company;
+        document.getElementById("fLocation").value         = job.location;
+        document.getElementById("fType").value             = job.job_type;
+        document.getElementById("fSalaryMin").value        = job.salary_min || "";
+        document.getElementById("fSalaryMax").value        = job.salary_max || "";
+        document.getElementById("fDescription").value      = job.description;
+        document.getElementById("fRequirements").value     = job.requirements || "";
+        document.getElementById("fStatus").value           = job.status;
         new bootstrap.Modal(document.getElementById("jobModal")).show();
     }
 
@@ -530,8 +548,8 @@
     async function handleJobSubmit(e) {
         e.preventDefault();
 
-        const btn    = document.getElementById("submitJobBtn");
-        const jobId  = document.getElementById("jobId").value;
+        const btn   = document.getElementById("submitJobBtn");
+        const jobId = document.getElementById("jobId").value;
 
         const payload = {
             title:        document.getElementById("fTitle").value.trim(),
@@ -550,7 +568,9 @@
 
         let result;
         if (editMode) {
-            result = await apiRequest(`/jobs/update?id=${jobId}`, "PUT", payload, true);
+            result = await apiRequest(
+                `/jobs/update?id=${jobId}`, "PUT", payload, true
+            );
         } else {
             result = await apiRequest("/jobs/create", "POST", payload, true);
         }
@@ -563,9 +583,13 @@
             return;
         }
 
-        // Close modal & reload
-        bootstrap.Modal.getInstance(document.getElementById("jobModal")).hide();
-        showAlert("pageAlert", editMode ? "Job updated successfully!" : "Job posted successfully!", "success");
+        bootstrap.Modal.getInstance(
+            document.getElementById("jobModal")
+        ).hide();
+
+        showAlert("pageAlert",
+            editMode ? "Job updated!" : "Job posted successfully!",
+            "success");
         loadJobs(currentPage);
     }
 
@@ -573,7 +597,7 @@
     function openDeleteModal(id, title) {
         deleteJobId = id;
         document.getElementById("deleteJobTitle").textContent =
-            `Are you sure you want to delete "${title}"?`;
+            `Delete "${title}"?`;
         new bootstrap.Modal(document.getElementById("deleteModal")).show();
     }
 
@@ -583,36 +607,35 @@
         btn.innerHTML = '<span class="wb-spinner"></span>';
         btn.disabled  = true;
 
-        const { data } = await apiRequest(`/jobs/delete?id=${deleteJobId}`, "DELETE", null, true);
+        const { data } = await apiRequest(
+            `/jobs/delete?id=${deleteJobId}`, "DELETE", null, true
+        );
 
         btn.innerHTML = "Delete";
         btn.disabled  = false;
 
-        bootstrap.Modal.getInstance(document.getElementById("deleteModal")).hide();
+        bootstrap.Modal.getInstance(
+            document.getElementById("deleteModal")
+        ).hide();
 
-        if (!data.success) {
-            showAlert("pageAlert", data.message, "danger");
-            return;
-        }
-
-        showAlert("pageAlert", data.data.action === "deleted"
-            ? "Job deleted successfully!"
-            : "Job has applications — it has been closed instead.", "success");
+        showAlert("pageAlert",
+            data.data?.action === "deleted"
+                ? "Job deleted successfully!"
+                : "Job closed (has applications).",
+            "success");
         loadJobs(currentPage);
     }
 
     // ── Pagination ────────────────────────
     function renderPagination(totalPages, current) {
-        if (totalPages <= 1) {
-            document.getElementById("pagination").innerHTML = "";
-            return;
-        }
+        const el = document.getElementById("pagination");
+        if (totalPages <= 1) { el.innerHTML = ""; return; }
         let html = "";
         for (let i = 1; i <= totalPages; i++) {
             html += `<button class="wb-page-btn ${i === current ? "active" : ""}"
                              onclick="loadJobs(${i})">${i}</button>`;
         }
-        document.getElementById("pagination").innerHTML = html;
+        el.innerHTML = html;
     }
 
     // ── Debounce Search ───────────────────
@@ -622,19 +645,5 @@
     }
 
 </script>
-<div class="wb-mobile-nav">
-    <a href="dashboard.html">
-        <i class="bi bi-grid"></i> Dashboard
-    </a>
-    <a href="jobs.html" class="active">
-        <i class="bi bi-briefcase"></i> Jobs
-    </a>
-    <a href="applications.html">
-        <i class="bi bi-file-text"></i> Applications
-    </a>
-    <a href="../index.html">
-        <i class="bi bi-eye"></i> View Site
-    </a>
-</div>
 </body>
 </html>

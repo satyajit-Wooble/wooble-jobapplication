@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Auth Guard -->
+    <script>
+        (function() {
+            const token = localStorage.getItem("wooble_token");
+            const user  = JSON.parse(localStorage.getItem("wooble_user") || "null");
+            if (!token || !user || user.role !== "company") {
+                localStorage.removeItem("wooble_token");
+                localStorage.removeItem("wooble_user");
+                window.location.replace("/frontend/login.html");
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
+    <title>Candidates || Wooble Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { background: var(--bg-light); }
+        .wb-sidebar {
+            background: #0f172a; min-height: 100vh; width: 240px;
+            position: fixed; top: 0; left: 0; z-index: 100;
+            display: flex; flex-direction: column;
+        }
+        .sidebar-brand { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-user  { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-user .avatar {
+            width: 40px; height: 40px; background: #f59e0b; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 16px; flex-shrink: 0;
+        }
+        .sidebar-nav { padding: 12px 0; flex: 1; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 24px; color: #94a3b8; font-size: 14px;
+            font-weight: 500; transition: all 0.2s; text-decoration: none;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08); color: white;
+            border-right: 3px solid #f59e0b;
+        }
+        .sidebar-nav a.active { font-weight: 700; color: white; }
+        .sidebar-nav .nav-section {
+            padding: 16px 24px 8px; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; color: #475569;
+        }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .wb-main { margin-left: 240px; min-height: 100vh; }
+        .wb-topbar {
+            background: var(--white); border-bottom: 1px solid var(--border);
+            padding: 16px 32px; display: flex; align-items: center;
+            justify-content: space-between; position: sticky; top: 0; z-index: 50;
+        }
+        .candidate-card {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 20px 24px;
+            margin-bottom: 12px; transition: all 0.2s;
+        }
+        .candidate-card:hover { box-shadow: var(--shadow-md); border-color: var(--primary); }
+        .candidate-avatar {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: var(--primary-light); display: flex; align-items: center;
+            justify-content: center; font-weight: 700; color: var(--primary);
+            font-size: 20px; flex-shrink: 0;
+        }
+        @media(max-width:768px) { .wb-sidebar { display: none; } .wb-main { margin-left: 0; } }
+    </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════ -->
+<div class="wb-sidebar">
+    <div class="sidebar-brand">
+        <a href="../index.html" style="text-decoration:none;">
+            <span style="font-size:18px;font-weight:800;color:white;">👑 Wooble Admin</span>
+        </a>
+        <div style="font-size:11px;color:#475569;margin-top:4px;">Company Super Panel</div>
+    </div>
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" id="sidebarAvatar">W</div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:white;" id="sidebarName">Loading...</div>
+                <div style="font-size:12px;color:#f59e0b;font-weight:600;">👑 Company Admin</div>
+            </div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Overview</div>
+        <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
+        <div class="nav-section">Manage</div>
+        <a href="employers.html"><i class="bi bi-building"></i> Employers</a>
+        <a href="jobs.html"><i class="bi bi-briefcase"></i> All Jobs</a>
+        <a href="applications.html"><i class="bi bi-file-text"></i> All Applications</a>
+        <a href="candidates.html" class="active"><i class="bi bi-people"></i> Candidates</a>
+        <div class="nav-section">Site</div>
+        <a href="../index.html"><i class="bi bi-eye"></i> View Site</a>
+    </nav>
+    <div class="sidebar-footer">
+        <button onclick="Auth.logout()"
+                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+                       color:#94a3b8;border-radius:var(--radius-pill);padding:9px 16px;
+                       font-size:13px;width:100%;cursor:pointer;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- ══ MAIN ══════════════════════════════════ -->
+<div class="wb-main">
+    <div class="wb-topbar">
+        <div>
+            <h5 style="margin:0;font-weight:700;">Candidates</h5>
+            <p class="text-muted mb-0" style="font-size:13px;">
+                View all registered candidates
+            </p>
+        </div>
+        <span class="wb-badge wb-badge-blue" id="topbarCount">Loading...</span>
+    </div>
+
+    <div style="padding:32px;">
+        <div id="pageAlert" class="wb-alert"></div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-blue">👥</div>
+                    <div>
+                        <div class="stat-number" id="statTotal">—</div>
+                        <div class="stat-label">Total Candidates</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-green">📋</div>
+                    <div>
+                        <div class="stat-number" id="statApplied">—</div>
+                        <div class="stat-label">Applied to Jobs</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-yellow">🆕</div>
+                    <div>
+                        <div class="stat-number" id="statNew">—</div>
+                        <div class="stat-label">New This Month</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="wb-stat-card">
+                    <div class="icon icon-purple">📅</div>
+                    <div>
+                        <div class="stat-number" id="statInvited">—</div>
+                        <div class="stat-label">Got Invited</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="wb-filter-bar d-flex flex-wrap gap-3 align-items-center mb-4">
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <i class="bi bi-search text-muted"></i>
+                <input type="text" id="searchInput"
+                       class="form-control border-0 shadow-none"
+                       placeholder="Search by name or email..."
+                       onkeyup="debounceSearch()"
+                       style="background:transparent;">
+            </div>
+            <span class="text-muted" style="font-size:13px;" id="candidateCount"></span>
+        </div>
+
+        <!-- Candidates List -->
+        <div id="candidatesList">
+            <div class="text-center py-5 text-muted">
+                <div class="wb-spinner"
+                     style="border-color:var(--border);border-top-color:var(--primary);
+                            width:32px;height:32px;border-width:3px;"></div>
+                <p class="mt-3">Loading candidates...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="wb-pagination" id="pagination"></div>
+    </div>
+</div>
+
+<!-- CANDIDATE DETAIL MODAL -->
+<div class="modal fade" id="candidateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:var(--radius-md);border:none;">
+            <div class="modal-header wb-modal-header">
+                <h5 class="modal-title">Candidate Detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="candidateModalContent">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script>
+
+    let allCandidates = [];
+    let currentPage   = 1;
+    let debounceTimer = null;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        if (!requireAuth("company")) return;
+
+        const user = Auth.getUser();
+        if (user) {
+            document.getElementById("sidebarName").textContent   = user.name;
+            document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+        }
+
+        await loadCandidates();
+    });
+
+    // ── Load Candidates ───────────────────
+    async function loadCandidates(page = 1) {
+        currentPage = page;
+        const search = document.getElementById("searchInput").value.trim();
+
+        let query = `?page=${page}`;
+        if (search) query += `&search=${encodeURIComponent(search)}`;
+
+        const { data } = await apiRequest(
+            `/company/candidates${query}`, "GET", null, true
+        );
+
+        if (!data.success) {
+            document.getElementById("candidatesList").innerHTML = `
+                <div class="wb-empty-state">
+                    <div class="icon">😕</div>
+                    <h5>Failed to load candidates</h5>
+                    <p>${data.message}</p>
+                </div>`;
+            return;
+        }
+
+        const { candidates, total, total_pages, stats } = data.data;
+
+        // Update stats
+        document.getElementById("statTotal").textContent   = stats.total    || 0;
+        document.getElementById("statApplied").textContent = stats.applied  || 0;
+        document.getElementById("statNew").textContent     = stats.new_this_month || 0;
+        document.getElementById("statInvited").textContent = stats.invited  || 0;
+        document.getElementById("topbarCount").textContent = `${total} Candidates`;
+        document.getElementById("candidateCount").textContent =
+            `${total} candidate${total !== 1 ? "s" : ""} found`;
+
+        if (candidates.length === 0) {
+            document.getElementById("candidatesList").innerHTML = `
+                <div class="wb-empty-state">
+                    <div class="icon">👥</div>
+                    <h5>No candidates found</h5>
+                    <p>No candidates registered yet</p>
+                </div>`;
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+
+        document.getElementById("candidatesList").innerHTML =
+            candidates.map(c => `
+            <div class="candidate-card">
+                <div class="d-flex justify-content-between
+                            align-items-start flex-wrap gap-3">
+
+                    <!-- Left: Candidate Info -->
+                    <div class="d-flex gap-3 align-items-start">
+                        <div class="candidate-avatar">
+                            ${c.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="font-size:16px;font-weight:700;margin-bottom:4px;">
+                                ${c.name}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);margin-bottom:8px;">
+                                <i class="bi bi-envelope"></i> ${c.email}
+                                ${c.phone
+                                    ? `&nbsp;·&nbsp;<i class="bi bi-phone"></i> ${c.phone}`
+                                    : ""}
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-clock"></i>
+                                Joined ${formatDate(c.created_at)}
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="wb-badge wb-badge-blue">
+                                    📋 ${c.total_applications} Applications
+                                </span>
+                                ${c.total_invited > 0
+                                    ? `<span class="wb-badge wb-badge-green">
+                                           📅 ${c.total_invited} Invited
+                                       </span>`
+                                    : ""}
+                                ${c.total_shortlisted > 0
+                                    ? `<span class="wb-badge wb-badge-blue">
+                                           ⭐ ${c.total_shortlisted} Shortlisted
+                                       </span>`
+                                    : ""}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Actions -->
+                    <button onclick="viewCandidate(${c.id})"
+                            class="btn-wb-outline"
+                            style="font-size:13px;padding:8px 16px;">
+                        <i class="bi bi-eye"></i> View Profile
+                    </button>
+
+                </div>
+            </div>`).join("");
+
+        renderPagination(total_pages, page);
+    }
+
+    // ── View Candidate Detail ─────────────
+    async function viewCandidate(id) {
+        const modal = new bootstrap.Modal(
+            document.getElementById("candidateModal")
+        );
+
+        document.getElementById("candidateModalContent").innerHTML = `
+            <div class="text-center py-4">
+                <div class="wb-spinner"
+                     style="border-color:var(--border);border-top-color:var(--primary);
+                            width:32px;height:32px;border-width:3px;"></div>
+                <p class="text-muted mt-3">Loading...</p>
+            </div>`;
+        modal.show();
+
+        const { data } = await apiRequest(
+            `/company/candidates/${id}`, "GET", null, true
+        );
+
+        if (!data.success) {
+            document.getElementById("candidateModalContent").innerHTML = `
+                <div class="wb-empty-state">
+                    <h5>Failed to load</h5>
+                    <p>${data.message}</p>
+                </div>`;
+            return;
+        }
+
+        const { candidate, applications } = data.data;
+
+        document.getElementById("candidateModalContent").innerHTML = `
+
+            <!-- Profile Header -->
+            <div class="d-flex gap-4 align-items-center mb-4">
+                <div class="candidate-avatar"
+                     style="width:64px;height:64px;font-size:26px;">
+                    ${candidate.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <h4 style="font-weight:800;margin-bottom:4px;">
+                        ${candidate.name}
+                    </h4>
+                    <div style="color:var(--text-light);font-size:14px;">
+                        ${candidate.email}
+                        ${candidate.phone ? ` · ${candidate.phone}` : ""}
+                    </div>
+                    <div style="margin-top:8px;font-size:12px;color:var(--text-light);">
+                        Joined ${formatDate(candidate.created_at)}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-3 text-center">
+                    <div style="font-size:24px;font-weight:800;color:var(--primary);">
+                        ${candidate.total_applications}
+                    </div>
+                    <div style="font-size:12px;color:var(--text-light);">Applied</div>
+                </div>
+                <div class="col-3 text-center">
+                    <div style="font-size:24px;font-weight:800;color:#3b82f6;">
+                        ${candidate.total_shortlisted}
+                    </div>
+                    <div style="font-size:12px;color:var(--text-light);">Shortlisted</div>
+                </div>
+                <div class="col-3 text-center">
+                    <div style="font-size:24px;font-weight:800;color:#22c55e;">
+                        ${candidate.total_invited}
+                    </div>
+                    <div style="font-size:12px;color:var(--text-light);">Invited</div>
+                </div>
+                <div class="col-3 text-center">
+                    <div style="font-size:24px;font-weight:800;color:#ef4444;">
+                        ${candidate.total_rejected}
+                    </div>
+                    <div style="font-size:12px;color:var(--text-light);">Rejected</div>
+                </div>
+            </div>
+
+            <!-- Applications History -->
+            <h6 style="font-weight:700;margin-bottom:16px;">
+                Application History
+            </h6>
+
+            ${applications.length === 0
+                ? `<p class="text-muted text-center py-3">No applications yet</p>`
+                : applications.map(app => `
+                <div class="d-flex align-items-center justify-content-between py-3"
+                     style="border-bottom:1px solid var(--border);">
+                    <div>
+                        <div style="font-size:14px;font-weight:700;">
+                            ${app.job_title}
+                        </div>
+                        <div style="font-size:12px;color:var(--text-light);">
+                            ${app.company} · ${formatDate(app.applied_at)}
+                        </div>
+                    </div>
+                    ${statusBadge(app.status)}
+                </div>`).join("")
+            }
+        `;
+    }
+
+    // ── Pagination ────────────────────────
+    function renderPagination(totalPages, current) {
+        const el = document.getElementById("pagination");
+        if (totalPages <= 1) { el.innerHTML = ""; return; }
+        let html = "";
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="wb-page-btn ${i === current ? "active" : ""}"
+                             onclick="loadCandidates(${i})">${i}</button>`;
+        }
+        el.innerHTML = html;
+    }
+
+    // ── Debounce Search ───────────────────
+    function debounceSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => loadCandidates(1), 500);
+    }
+
+</script>
+</body>
+</html>

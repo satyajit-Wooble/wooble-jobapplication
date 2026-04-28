@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpeg" href="wooble_image/images.jpg">
-    <title>Jobs - sign in | Wooble</title>
+    <title>Sign In — Wooble Jobs</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -22,6 +22,64 @@
             justify-content: center;
             padding: 40px 16px;
         }
+
+        .login-type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .login-type-btn {
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            background: var(--white);
+        }
+
+        .login-type-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .login-type-btn.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .login-type-btn .type-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .login-type-btn .type-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .login-type-btn .type-desc {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        .pending-notice {
+            background: #fef9c3;
+            border: 1px solid #fde047;
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .pending-notice p {
+            font-size: 13px;
+            color: #854d0e;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -29,9 +87,13 @@
 <!-- Navbar -->
 <nav class="wb-navbar navbar">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html" style="margin-left: -50px;">
-    <img src="wooble_image/wooble_logo_blue_1.png" alt="Wooble Jobs" style="height:30px; width:auto;">
-</a>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+            <img src="wooble_image/wooble_logo_blue_1.png" alt="Wooble Jobs" style="height:35px; width:auto;">
+            <span class="d-lg-none nav-link active" style="font-size:15px;color:var(--primary);font-weight:600; margin-top: 18px;">
+               <i class="bi bi-briefcase"></i>Jobs
+             </span>
+        </a>
+        
         <a href="register.html" class="btn-wb-outline">Create Account</a>
     </div>
 </nav>
@@ -42,9 +104,52 @@
 
         <!-- Header -->
         <div class="text-center mb-4">
-            <div style="font-size:48px;margin-bottom:12px;">👋</div>
-            <h2>Welcome Back</h2>
-            <p class="subtitle">Sign in to your Wooble Jobs account</p>
+            <div style="font-size:48px;margin-bottom:12px;" id="loginIcon">👋</div>
+            <h2 id="loginTitle">Welcome Back</h2>
+            <p class="subtitle" id="loginSubtitle">
+                Sign in to your Wooble Jobs account
+            </p>
+        </div>
+
+        <!-- Login Type Selector -->
+        <div class="wb-form-group">
+            <label>Login as</label>
+            <div class="login-type-selector">
+
+                <!-- Candidate -->
+                <div class="login-type-btn active"
+                     onclick="selectLoginType('candidate', this)">
+                    <div class="type-icon">👤</div>
+                    <div class="type-name">Candidate</div>
+                    <div class="type-desc">Job seeker</div>
+                </div>
+
+                <!-- Employer -->
+                <div class="login-type-btn"
+                     onclick="selectLoginType('employer', this)">
+                    <div class="type-icon">🏢</div>
+                    <div class="type-name">Employer</div>
+                    <div class="type-desc">Hiring talent</div>
+                </div>
+
+                <!-- Company -->
+                <div class="login-type-btn"
+                     onclick="selectLoginType('company', this)">
+                    <div class="type-icon">👑</div>
+                    <div class="type-name">Wooble</div>
+                    <div class="type-desc">Company admin</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Pending Notice for Employer -->
+        <div class="pending-notice" id="pendingNotice">
+            <p>
+                ⚠️ <strong>Employer accounts</strong> require approval from
+                Wooble before login. If you just registered, please wait
+                for approval notification.
+            </p>
         </div>
 
         <!-- Alert -->
@@ -55,40 +160,38 @@
 
             <div class="wb-form-group">
                 <label>Email Address</label>
-                <input type="email" id="email" class="wb-form-control"
+                <input type="email" id="email"
+                       class="wb-form-control"
                        placeholder="your@email.com" required>
             </div>
 
             <div class="wb-form-group">
                 <label>Password</label>
                 <div class="position-relative">
-                    <input type="password" id="password" class="wb-form-control"
+                    <input type="password" id="password"
+                           class="wb-form-control"
                            placeholder="Enter your password" required>
                     <button type="button"
                             onclick="togglePassword('password', this)"
-                            style="position:absolute;right:14px;top:50%;transform:translateY(-50%);
-                                   background:none;border:none;color:var(--text-light);cursor:pointer;">
+                            style="position:absolute;right:14px;top:50%;
+                                   transform:translateY(-50%);background:none;
+                                   border:none;color:var(--text-light);
+                                   cursor:pointer;">
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
             </div>
 
-            <button type="submit" class="btn-wb-primary w-100 py-3 mt-2" id="loginBtn">
+            <button type="submit"
+                    class="btn-wb-primary w-100 py-3 mt-2"
+                    id="loginBtn">
                 Sign In
             </button>
 
         </form>
 
-        <!-- Divider -->
-        <div class="text-center my-4" style="position:relative;">
-            <hr style="border-color:var(--border);">
-            <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-                         background:var(--white);padding:0 12px;font-size:13px;color:var(--text-light);">
-                OR
-            </span>
-        </div>
-
-        <p class="text-center mb-0" style="font-size:14px;color:var(--text-light);">
+        <p class="text-center mt-4 mb-0"
+           style="font-size:14px;color:var(--text-light);">
             Don't have an account?
             <a href="register.html" class="fw-600">Create one free</a>
         </p>
@@ -98,8 +201,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/config.js"></script>
-<script src="assets/js/auth.js"></script>
 <script>
+
+    let currentLoginType = "candidate";
 
     // Redirect if already logged in
     document.addEventListener("DOMContentLoaded", () => {
@@ -107,6 +211,34 @@
             redirectToDashboard();
         }
     });
+
+    // ── Select Login Type ─────────────────
+    function selectLoginType(type, el) {
+        currentLoginType = type;
+
+        // Reset all buttons
+        document.querySelectorAll(".login-type-btn").forEach(b => {
+            b.classList.remove("active");
+        });
+        el.classList.add("active");
+
+        // Show pending notice for employer
+        const notice = document.getElementById("pendingNotice");
+        notice.style.display = type === "employer" ? "block" : "none";
+
+        // Update header
+        const icons    = { candidate: "👋", employer: "🏢", company: "👑" };
+        const titles   = { candidate: "Welcome Back", employer: "Employer Login", company: "Company Login" };
+        const subtitles = {
+            candidate: "Sign in to find your dream job",
+            employer:  "Sign in to manage your job postings",
+            company:   "Sign in to Wooble admin panel"
+        };
+
+        document.getElementById("loginIcon").textContent     = icons[type];
+        document.getElementById("loginTitle").textContent    = titles[type];
+        document.getElementById("loginSubtitle").textContent = subtitles[type];
+    }
 
     // ── Handle Login ──────────────────────
     async function handleLogin(e) {
@@ -116,17 +248,38 @@
         const password = document.getElementById("password").value;
         const btn      = document.getElementById("loginBtn");
 
-        // Loading state
-        btn.innerHTML  = '<span class="wb-spinner"></span> Signing in...';
-        btn.disabled   = true;
+        btn.innerHTML = '<span class="wb-spinner"></span> Signing in...';
+        btn.disabled  = true;
 
-        const { status, data } = await apiRequest("/auth/login", "POST", { email, password });
+        const { data } = await apiRequest("/auth/login", "POST", {
+            email, password
+        });
 
         btn.innerHTML = "Sign In";
         btn.disabled  = false;
 
         if (!data.success) {
-            showAlert("authAlert", data.message, "danger");
+            // Special handling for pending/rejected employer
+            if (data.status === "pending") {
+                showAlert("authAlert",
+                    "⏳ Your employer account is pending approval by Wooble. Please wait.",
+                    "danger");
+            } else if (data.status === "rejected") {
+                showAlert("authAlert",
+                    "❌ Your employer account has been rejected. Contact Wooble for help.",
+                    "danger");
+            } else {
+                showAlert("authAlert", data.message, "danger");
+            }
+            return;
+        }
+
+        // Validate role matches selected login type
+        const userRole = data.data.user.role;
+        if (userRole !== currentLoginType) {
+            showAlert("authAlert",
+                `This account is registered as ${userRole}. Please select correct login type.`,
+                "danger");
             return;
         }
 
@@ -141,14 +294,19 @@
 
     // ── Redirect based on role ────────────
     function redirectToDashboard() {
-        if (Auth.isAdmin()) {
-            window.location.href = "admin/dashboard.html";
+        const user = Auth.getUser();
+        if (!user) return;
+
+        if (user.role === "company") {
+            window.location.href = "/frontend/company/dashboard.html";
+        } else if (user.role === "employer") {
+            window.location.href = "/frontend/employer/dashboard.html";
         } else {
-            window.location.href = "candidate/dashboard.html";
+            window.location.href = "/frontend/candidate/dashboard.html";
         }
     }
 
-    // ── Toggle password visibility ────────
+    // ── Toggle Password ───────────────────
     function togglePassword(id, btn) {
         const input = document.getElementById(id);
         if (input.type === "password") {

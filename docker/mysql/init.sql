@@ -18,10 +18,42 @@ CREATE TABLE IF NOT EXISTS `users` (
     `name`       VARCHAR(100) NOT NULL,
     `email`      VARCHAR(150) NOT NULL UNIQUE,
     `password`   VARCHAR(255) NOT NULL,
-    `role`       ENUM('admin','candidate') NOT NULL DEFAULT 'candidate',
+    `role` ENUM('candidate','employer','company') NOT NULL DEFAULT 'candidate',
     `phone`      VARCHAR(20) DEFAULT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────
+-- TABLE: employer_profiles
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `employer_profiles` (
+    `id`           INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id`      INT(11) UNSIGNED NOT NULL UNIQUE,
+    `company_name` VARCHAR(150) NOT NULL,
+    `website`      VARCHAR(255) DEFAULT NULL,
+    `industry`     VARCHAR(100) DEFAULT NULL,
+    `description`  TEXT DEFAULT NULL,
+    `location`     VARCHAR(150) DEFAULT NULL,
+    `logo_path`    VARCHAR(255) DEFAULT NULL,
+    `status`       ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`   DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────
+-- TABLE: notifications
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `notifications` (
+    `id`         INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id`    INT(11) UNSIGNED NOT NULL,
+    `title`      VARCHAR(255) NOT NULL,
+    `message`    TEXT NOT NULL,
+    `type`       ENUM('info','success','warning','danger') NOT NULL DEFAULT 'info',
+    `is_read`    TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─────────────────────────────────────────
@@ -29,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `jobs` (
     `id`           INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `admin_id`     INT(11) UNSIGNED NOT NULL,
+    `posted_by`    INT(11) UNSIGNED NOT NULL,
     `title`        VARCHAR(150) NOT NULL,
     `company`      VARCHAR(100) NOT NULL,
     `location`     VARCHAR(100) NOT NULL,
@@ -41,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `jobs` (
     `status`       ENUM('active','closed') NOT NULL DEFAULT 'active',
     `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`   DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (`admin_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`posted_by`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─────────────────────────────────────────
@@ -79,49 +111,58 @@ CREATE TABLE IF NOT EXISTS `invitations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─────────────────────────────────────────
--- DEFAULT ADMIN USER
--- Password: admin123
+-- DEFAULT USERS
+-- Password for all: admin123
 -- ─────────────────────────────────────────
+-- ── Default Company (Super Admin) ─────────
 INSERT IGNORE INTO `users`
-    (`name`, `email`, `password`, `role`, `created_at`)
+    (name, email, password, role, created_at)
 VALUES (
-    'Super Admin',
-    'admin@wooble.com',
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-    'admin',
+    'Wooble',
+    'company@wooble.com',
+    '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B9bd/C2',
+    'company',
     NOW()
 );
 
--- ─────────────────────────────────────────
--- SAMPLE JOBS
--- ─────────────────────────────────────────
+-- ── Default Employer ──────────────────────
+INSERT IGNORE INTO `users`
+    (name, email, password, role, created_at)
+VALUES (
+    'Wooble Tech HR',
+    'employer@wooble.com',
+    '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B9bd/C2',
+    'employer',
+    NOW()
+);
+
+-- ── Default Employer Profile ──────────────
+INSERT IGNORE INTO `employer_profiles`
+    (user_id, company_name, website, industry,
+     location, description, status)
+VALUES (
+    2,
+    'Wooble Tech',
+    'https://wooble.org',
+    'Technology',
+    'Bhubaneswar, Odisha',
+    'We build proof of work platform for careers.',
+    'approved'
+);
+
+-- ── Sample Jobs (posted by employer) ──────
 INSERT IGNORE INTO `jobs`
-    (`admin_id`, `title`, `company`, `location`, `job_type`,
-     `description`, `requirements`, `salary_min`, `salary_max`, `status`)
+    (posted_by, title, company, location, job_type,
+     description, requirements, salary_min, salary_max, status)
 VALUES
-(1,
- 'PHP Developer',
- 'Wooble Tech',
- 'Bhubaneswar, Odisha',
- 'full-time',
- 'We are looking for an experienced PHP Developer to join our growing team. You will be responsible for building and maintaining web applications.',
- 'Min 2 years PHP experience, MySQL knowledge, REST API development',
- 25000, 50000, 'active'),
+(2, 'PHP Developer',      'Wooble Tech', 'Bhubaneswar', 'full-time',
+ 'Looking for PHP Developer.',
+ 'Min 2 years PHP, MySQL',       25000, 50000, 'active'),
 
-(1,
- 'Frontend Developer',
- 'Wooble Tech',
- 'Remote',
- 'remote',
- 'We need a skilled Frontend Developer with expertise in modern JavaScript frameworks and responsive design.',
- 'HTML, CSS, JavaScript, Bootstrap 5, React or Vue experience preferred',
- 20000, 45000, 'active'),
+(2, 'Frontend Developer', 'Wooble Tech', 'Remote',       'remote',
+ 'Looking for Frontend Developer.',
+ 'HTML, CSS, JavaScript, Bootstrap', 20000, 45000, 'active'),
 
-(1,
- 'Full Stack Developer',
- 'Wooble Tech',
- 'Bhubaneswar, Odisha',
- 'full-time',
- 'Looking for a Full Stack Developer who can work on both frontend and backend technologies.',
- 'PHP, MySQL, JavaScript, REST APIs, Git knowledge required',
- 35000, 70000, 'active');
+(2, 'Full Stack Developer','Wooble Tech','Bhubaneswar',  'full-time',
+ 'Looking for Full Stack Developer.',
+ 'PHP, MySQL, JavaScript, REST APIs', 35000, 70000, 'active');

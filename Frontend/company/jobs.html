@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Auth Guard -->
+    <script>
+        (function() {
+            const token = localStorage.getItem("wooble_token");
+            const user  = JSON.parse(localStorage.getItem("wooble_user") || "null");
+            if (!token || !user || user.role !== "company") {
+                localStorage.removeItem("wooble_token");
+                localStorage.removeItem("wooble_user");
+                window.location.replace("/frontend/login.html");
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
+    <title>All Jobs || Wooble Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { background: var(--bg-light); }
+        .wb-sidebar {
+            background: #0f172a;
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-brand { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-user  { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-user .avatar {
+            width: 40px; height: 40px; background: #f59e0b;
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; color: white;
+            font-weight: 700; font-size: 16px; flex-shrink: 0;
+        }
+        .sidebar-nav { padding: 12px 0; flex: 1; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 24px; color: #94a3b8; font-size: 14px;
+            font-weight: 500; transition: all 0.2s; text-decoration: none;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08); color: white;
+            border-right: 3px solid #f59e0b;
+        }
+        .sidebar-nav a.active { font-weight: 700; color: white; }
+        .sidebar-nav .nav-section {
+            padding: 16px 24px 8px; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; color: #475569;
+        }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .wb-main { margin-left: 240px; min-height: 100vh; }
+        .wb-topbar {
+            background: var(--white); border-bottom: 1px solid var(--border);
+            padding: 16px 32px; display: flex; align-items: center;
+            justify-content: space-between; position: sticky; top: 0; z-index: 50;
+        }
+        .job-row {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 20px 24px;
+            margin-bottom: 12px; transition: all 0.2s;
+        }
+        .job-row:hover { box-shadow: var(--shadow-md); border-color: var(--primary); }
+        @media(max-width:768px) { .wb-sidebar { display: none; } .wb-main { margin-left: 0; } }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="wb-sidebar">
+    <div class="sidebar-brand">
+        <a href="../index.html" style="text-decoration:none;">
+            <span style="font-size:18px;font-weight:800;color:white;">👑 Wooble Admin</span>
+        </a>
+        <div style="font-size:11px;color:#475569;margin-top:4px;">Company Super Panel</div>
+    </div>
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" id="sidebarAvatar">W</div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:white;" id="sidebarName">Loading...</div>
+                <div style="font-size:12px;color:#f59e0b;font-weight:600;">👑 Company Admin</div>
+            </div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Overview</div>
+        <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
+        <div class="nav-section">Manage</div>
+        <a href="employers.html"><i class="bi bi-building"></i> Employers</a>
+        <a href="jobs.html" class="active"><i class="bi bi-briefcase"></i> All Jobs</a>
+        <a href="applications.html"><i class="bi bi-file-text"></i> All Applications</a>
+        <a href="candidates.html"><i class="bi bi-people"></i> Candidates</a>
+        <div class="nav-section">Site</div>
+        <a href="../index.html"><i class="bi bi-eye"></i> View Site</a>
+    </nav>
+    <div class="sidebar-footer">
+        <button onclick="Auth.logout()"
+                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+                       color:#94a3b8;border-radius:var(--radius-pill);padding:9px 16px;
+                       font-size:13px;width:100%;cursor:pointer;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="wb-main">
+    <div class="wb-topbar">
+        <div>
+            <h5 style="margin:0;font-weight:700;">All Jobs</h5>
+            <p class="text-muted mb-0" style="font-size:13px;">Manage all job postings across all employers</p>
+        </div>
+        <span class="wb-badge wb-badge-blue" id="jobCount">Loading...</span>
+    </div>
+
+    <div style="padding:32px;">
+        <div id="pageAlert" class="wb-alert"></div>
+
+        <!-- Filter Bar -->
+        <div class="wb-filter-bar d-flex flex-wrap gap-3 align-items-center mb-4">
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <i class="bi bi-search text-muted"></i>
+                <input type="text" id="searchJobs" class="form-control border-0 shadow-none"
+                       placeholder="Search jobs..." onkeyup="debounceSearch()"
+                       style="background:transparent;">
+            </div>
+            <select id="filterStatus" class="form-select w-auto" onchange="loadJobs()">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="closed">Closed</option>
+            </select>
+            <select id="filterType" class="form-select w-auto" onchange="loadJobs()">
+                <option value="">All Types</option>
+                <option value="full-time">Full Time</option>
+                <option value="part-time">Part Time</option>
+                <option value="remote">Remote</option>
+                <option value="contract">Contract</option>
+            </select>
+        </div>
+
+        <!-- Jobs List -->
+        <div id="jobsList">
+            <div class="text-center py-5 text-muted">
+                <div class="wb-spinner" style="border-color:var(--border);border-top-color:var(--primary);width:32px;height:32px;border-width:3px;"></div>
+                <p class="mt-3">Loading jobs...</p>
+            </div>
+        </div>
+
+        <div class="wb-pagination" id="pagination"></div>
+    </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content" style="border-radius:var(--radius-md);border:none;">
+            <div class="modal-body p-4 text-center">
+                <div style="font-size:48px;margin-bottom:16px;">🗑️</div>
+                <h5 style="font-weight:700;">Delete Job?</h5>
+                <p class="text-muted" style="font-size:14px;" id="deleteJobTitle"></p>
+                <div class="d-flex gap-2 justify-content-center mt-3">
+                    <button class="btn-wb-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn-wb-danger" onclick="confirmDelete()" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script>
+    let currentPage   = 1;
+    let debounceTimer = null;
+    let deleteJobId   = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!requireAuth("company")) return;
+        const user = Auth.getUser();
+        if (user) {
+            document.getElementById("sidebarName").textContent   = user.name;
+            document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+        }
+        loadJobs();
+    });
+
+    async function loadJobs(page = 1) {
+        currentPage = page;
+        const search = document.getElementById("searchJobs").value.trim();
+        const status = document.getElementById("filterStatus").value;
+        const type   = document.getElementById("filterType").value;
+
+        let query = `?page=${page}`;
+        if (search) query += `&search=${encodeURIComponent(search)}`;
+        if (status) query += `&status=${status}`;
+        if (type)   query += `&type=${type}`;
+
+        const { data } = await apiRequest(`/jobs/admin-list${query}`, "GET", null, true);
+
+        if (!data.success) {
+            document.getElementById("jobsList").innerHTML = `
+                <div class="wb-empty-state"><div class="icon">😕</div>
+                <h5>Failed to load</h5><p>${data.message}</p></div>`;
+            return;
+        }
+
+        const { jobs, total, total_pages } = data.data;
+        document.getElementById("jobCount").textContent = `${total} Jobs`;
+
+        if (jobs.length === 0) {
+            document.getElementById("jobsList").innerHTML = `
+                <div class="wb-empty-state"><div class="icon">💼</div>
+                <h5>No jobs found</h5></div>`;
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+
+        document.getElementById("jobsList").innerHTML = jobs.map(job => `
+            <div class="job-row">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div class="d-flex gap-3 align-items-start">
+                        <div style="width:48px;height:48px;background:var(--primary-light);
+                                    border-radius:var(--radius-sm);display:flex;align-items:center;
+                                    justify-content:center;font-weight:800;color:var(--primary);
+                                    font-size:18px;flex-shrink:0;">
+                            ${job.company.charAt(0)}
+                        </div>
+                        <div>
+                            <div style="font-size:16px;font-weight:700;margin-bottom:4px;">
+                                ${job.title}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);margin-bottom:8px;">
+                                <i class="bi bi-building"></i> ${job.company}
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-geo-alt"></i> ${job.location}
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-person"></i> ${job.posted_by_name || "Unknown"}
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-clock"></i> ${formatDate(job.created_at)}
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                ${jobTypeBadge(job.job_type)}
+                                ${statusBadge(job.status)}
+                                ${job.salary_min ? `<span class="wb-badge wb-badge-green">💰 ${formatSalary(job.salary_min, job.salary_max)}</span>` : ""}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-end gap-2">
+                        <div style="font-size:22px;font-weight:800;color:var(--primary);">
+                            ${job.total_applications || 0}
+                        </div>
+                        <div style="font-size:11px;color:var(--text-light);">applicants</div>
+                        <div class="d-flex gap-2 mt-1">
+                            <a href="../job-detail.html?id=${job.id}"
+                               class="btn-wb-outline" style="font-size:12px;padding:6px 12px;"
+                               target="_blank">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <button onclick="openDeleteModal(${job.id}, '${job.title.replace(/'/g, "\\'")}')"
+                                    class="btn-wb-danger" style="font-size:12px;padding:6px 12px;">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`).join("");
+
+        renderPagination(total_pages, page);
+    }
+
+    function openDeleteModal(id, title) {
+        deleteJobId = id;
+        document.getElementById("deleteJobTitle").textContent = `Delete "${title}"?`;
+        new bootstrap.Modal(document.getElementById("deleteModal")).show();
+    }
+
+    async function confirmDelete() {
+        const btn = document.getElementById("confirmDeleteBtn");
+        btn.innerHTML = '<span class="wb-spinner"></span>';
+        btn.disabled  = true;
+
+        const { data } = await apiRequest(`/jobs/delete?id=${deleteJobId}`, "DELETE", null, true);
+
+        btn.innerHTML = "Delete";
+        btn.disabled  = false;
+
+        bootstrap.Modal.getInstance(document.getElementById("deleteModal")).hide();
+        showAlert("pageAlert", data.message || "Job deleted!", "success");
+        loadJobs(currentPage);
+    }
+
+    function renderPagination(totalPages, current) {
+        const el = document.getElementById("pagination");
+        if (totalPages <= 1) { el.innerHTML = ""; return; }
+        let html = "";
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="wb-page-btn ${i === current ? "active" : ""}"
+                             onclick="loadJobs(${i})">${i}</button>`;
+        }
+        el.innerHTML = html;
+    }
+
+    function debounceSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => loadJobs(1), 500);
+    }
+</script>
+</body>
+</html>

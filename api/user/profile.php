@@ -67,7 +67,7 @@ if ($profile["role"] === "admin") {
             SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_jobs,
             SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) AS closed_jobs
         FROM jobs
-        WHERE admin_id = :id
+        WHERE posted_by = :id
     ");
     $stmt->execute([":id" => $profile["id"]]);
     $stats = $stmt->fetch();

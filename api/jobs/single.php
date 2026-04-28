@@ -43,7 +43,7 @@ $stmt = $db->prepare("
         u.email AS admin_email,
         (SELECT COUNT(*) FROM applications a WHERE a.job_id = j.id) AS total_applications
     FROM jobs j
-    JOIN users u ON j.admin_id = u.id
+    JOIN users u ON j.posted_by = u.id
     WHERE j.id = :id
     LIMIT 1
 ");

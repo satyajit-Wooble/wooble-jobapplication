@@ -14,8 +14,8 @@ if ($_SERVER["REQUEST_METHOD"] !== "PUT") {
 require_once __DIR__ . "/../config/database.php";
 require_once __DIR__ . "/../middleware/auth.php";
 
-// --- Admin only ---
-$admin = requireAdmin();
+// --- Employer or Company ---
+$user = requireEmployerOrCompany();
 
 $data   = json_decode(file_get_contents("php://input"), true);
 $job_id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
@@ -32,11 +32,18 @@ if ($job_id <= 0) {
 $db = (new Database())->getConnection();
 
 // --- Check job exists and belongs to this admin ---
-$stmt = $db->prepare("SELECT id FROM jobs WHERE id = :id AND admin_id = :admin_id LIMIT 1");
-$stmt->execute([
-    ":id"       => $job_id,
-    ":admin_id" => $admin["user_id"]
-]);
+// Company can update any job
+// Employer can only update their own jobs
+if ($user["role"] === "company") {
+    $stmt = $db->prepare("SELECT id FROM jobs WHERE id = :id LIMIT 1");
+    $stmt->execute([":id" => $job_id]);
+} else {
+    $stmt = $db->prepare("SELECT id FROM jobs WHERE id = :id AND posted_by = :posted_by LIMIT 1");
+    $stmt->execute([
+        ":id"        => $job_id,
+        ":posted_by" => $user["user_id"]
+    ]);
+}
 
 if (!$stmt->fetch()) {
     http_response_code(404);
@@ -122,9 +129,9 @@ $stmt->execute($params);
 
 // --- Return updated job ---
 $stmt = $db->prepare("
-    SELECT j.*, u.name AS posted_by 
+    SELECT j.*, u.name AS posted_by_name 
     FROM jobs j 
-    JOIN users u ON j.admin_id = u.id 
+    JOIN users u ON j.posted_by = u.id 
     WHERE j.id = :id
 ");
 $stmt->execute([":id" => $job_id]);

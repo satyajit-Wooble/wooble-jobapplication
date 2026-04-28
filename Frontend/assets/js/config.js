@@ -16,9 +16,14 @@ const Auth = {
 
     isLoggedIn: () => !!localStorage.getItem("wooble_token"),
 
-    isAdmin: () => {
+    isCompany: () => {
         const user = Auth.getUser();
-        return user && user.role === "admin";
+        return user && user.role === "company";
+    },
+
+    isEmployer: () => {
+        const user = Auth.getUser();
+        return user && user.role === "employer";
     },
 
     isCandidate: () => {
@@ -26,10 +31,24 @@ const Auth = {
         return user && user.role === "candidate";
     },
 
+    // backward compatibility
+    isAdmin: () => {
+        const user = Auth.getUser();
+        return user && (user.role === "company" || user.role === "employer");
+    },
+
     logout: () => {
         Auth.removeToken();
         Auth.removeUser();
         window.location.href = "/frontend/login.html";
+    },
+
+    getDashboardUrl: () => {
+        const user = Auth.getUser();
+        if (!user) return "/frontend/login.html";
+        if (user.role === "company")   return "/frontend/company/dashboard.html";
+        if (user.role === "employer")  return "/frontend/employer/dashboard.html";
+        return "/frontend/candidate/dashboard.html";
     }
 };
 
@@ -46,19 +65,27 @@ async function apiRequest(endpoint, method = "GET", body = null, auth = false) {
         const data = await res.json();
         return { status: res.status, data };
     } catch (err) {
-        return { status: 500, data: { success: false, message: "Network error. Please try again." } };
+        return {
+            status: 500,
+            data: { success: false, message: "Network error. Please try again." }
+        };
     }
 }
 
-// ── Form Data API Request (for file uploads) ──
+// ── Form Data API Request (file uploads) ──
 async function apiFormRequest(endpoint, formData) {
     const headers = { "Authorization": `Bearer ${Auth.getToken()}` };
     try {
-        const res  = await fetch(`${API_BASE}${endpoint}`, { method: "POST", headers, body: formData });
+        const res  = await fetch(`${API_BASE}${endpoint}`, {
+            method: "POST", headers, body: formData
+        });
         const data = await res.json();
         return { status: res.status, data };
     } catch (err) {
-        return { status: 500, data: { success: false, message: "Network error. Please try again." } };
+        return {
+            status: 500,
+            data: { success: false, message: "Network error. Please try again." }
+        };
     }
 }
 
@@ -96,7 +123,9 @@ function statusBadge(status) {
         invited:     { cls: "wb-badge-green",  icon: "📅", label: "Invited" },
         rejected:    { cls: "wb-badge-red",    icon: "❌", label: "Rejected" },
         active:      { cls: "wb-badge-green",  icon: "✅", label: "Active" },
-        closed:      { cls: "wb-badge-gray",   icon: "🔒", label: "Closed" }
+        closed:      { cls: "wb-badge-gray",   icon: "🔒", label: "Closed" },
+        approved:    { cls: "wb-badge-green",  icon: "✅", label: "Approved" },
+        pending:     { cls: "wb-badge-yellow", icon: "⏳", label: "Pending" }
     };
     const s = map[status] || { cls: "wb-badge-gray", icon: "•", label: status };
     return `<span class="wb-badge ${s.cls}">${s.icon} ${s.label}</span>`;
@@ -114,20 +143,51 @@ function jobTypeBadge(type) {
     return `<span class="wb-badge ${t.cls}">${t.label}</span>`;
 }
 
+// ── Role Badge HTML ───────────────────────
+function roleBadge(role) {
+    const map = {
+        candidate: { cls: "wb-badge-blue",   icon: "👤", label: "Candidate" },
+        employer:  { cls: "wb-badge-purple", icon: "🏢", label: "Employer" },
+        company:   { cls: "wb-badge-yellow", icon: "👑", label: "Company" }
+    };
+    const r = map[role] || { cls: "wb-badge-gray", icon: "•", label: role };
+    return `<span class="wb-badge ${r.cls}">${r.icon} ${r.label}</span>`;
+}
+
 // ── Redirect if not logged in ─────────────
 function requireAuth(role = null) {
-    if (!Auth.isLoggedIn()) {
+    const token = Auth.getToken();
+    const user  = Auth.getUser();
+
+    if (!token || !user) {
+        Auth.removeToken();
+        Auth.removeUser();
         window.location.href = "/frontend/login.html";
         return false;
     }
-    if (role === "admin" && !Auth.isAdmin()) {
+
+    if (role === "company" && user.role !== "company") {
         window.location.href = "/frontend/login.html";
         return false;
     }
-    if (role === "candidate" && !Auth.isCandidate()) {
+
+    if (role === "employer" && user.role !== "employer") {
         window.location.href = "/frontend/login.html";
         return false;
     }
+
+    if (role === "candidate" && user.role !== "candidate") {
+        window.location.href = "/frontend/login.html";
+        return false;
+    }
+
+    // Allow both employer and company
+    if (role === "employer_or_company" &&
+        !["employer", "company"].includes(user.role)) {
+        window.location.href = "/frontend/login.html";
+        return false;
+    }
+
     return true;
 }
 
@@ -153,24 +213,20 @@ function updateNavbar() {
             userName.textContent  = user.name;
             userName.style.cursor = "pointer";
             userName.onclick      = () => {
-                window.location.href = Auth.isAdmin()
-                    ? "/frontend/admin/dashboard.html"
-                    : "/frontend/candidate/profile.html";
+                window.location.href = Auth.getDashboardUrl();
             };
         }
 
         // Set profile link
         if (profileLink) {
-            profileLink.href = Auth.isAdmin()
-                ? "/frontend/admin/dashboard.html"
-                : "/frontend/candidate/profile.html";
+            profileLink.href = user.role === "candidate"
+                ? "/frontend/candidate/profile.html"
+                : Auth.getDashboardUrl();
         }
 
         // Set dashboard link
         if (dashLink) {
-            dashLink.href = Auth.isAdmin()
-                ? "/frontend/admin/dashboard.html"
-                : "/frontend/candidate/dashboard.html";
+            dashLink.href = Auth.getDashboardUrl();
         }
 
     } else {

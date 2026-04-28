@@ -1,6 +1,11 @@
 Options -Indexes
 RewriteEngine On
 
+# Allow all HTTP methods including DELETE and PUT
+<Limit GET POST PUT DELETE PATCH OPTIONS>
+    Allow from all
+</Limit>
+
 # ─────────────────────────────────────────
 # CORS Headers
 # ─────────────────────────────────────────
@@ -26,21 +31,32 @@ RewriteRule ^api/jobs/single/?$     api/jobs/single.php     [L,QSA]
 RewriteRule ^api/jobs/create/?$     api/jobs/create.php     [L,QSA]
 RewriteRule ^api/jobs/update/?$     api/jobs/update.php     [L,QSA]
 RewriteRule ^api/jobs/delete/?$     api/jobs/delete.php     [L,QSA]
+RewriteRule ^api/jobs/admin-list/?$ api/jobs/admin_list.php [L,QSA]
 
 # ─────────────────────────────────────────
 # APPLICATIONS ROUTES
 # ─────────────────────────────────────────
-RewriteRule ^api/applications/apply/?$          api/applications/apply.php          [L,QSA]
-RewriteRule ^api/applications/my/?$             api/applications/my_applications.php [L,QSA]
-RewriteRule ^api/applications/?$                api/applications/list.php            [L,QSA]
-RewriteRule ^api/applications/status/?$         api/applications/update_status.php   [L,QSA]
-RewriteRule ^api/applications/single/?$         api/applications/single.php          [L,QSA]
+RewriteRule ^api/applications/apply/?$      api/applications/apply.php           [L,QSA]
+RewriteRule ^api/applications/my/?$         api/applications/my_applications.php  [L,QSA]
+RewriteRule ^api/applications/?$            api/applications/list.php             [L,QSA]
+RewriteRule ^api/applications/status/?$     api/applications/update_status.php    [L,QSA]
+RewriteRule ^api/applications/single/?$     api/applications/single.php           [L,QSA]
 
 # ─────────────────────────────────────────
 # ADMIN ROUTES
 # ─────────────────────────────────────────
 RewriteRule ^api/admin/dashboard/?$   api/admin/dashboard.php   [L,QSA]
 
-# User Profile Routes
+# ─────────────────────────────────────────
+# USER PROFILE ROUTES
+# ─────────────────────────────────────────
 RewriteRule ^api/user/profile/?$         api/user/profile.php         [L,QSA]
 RewriteRule ^api/user/update-profile/?$  api/user/update_profile.php  [L,QSA]
+
+# ─────────────────────────────────────────
+# COMPANY ROUTES
+# ─────────────────────────────────────────
+RewriteRule ^api/company/employers/?$        api/company/employers.php  [L,QSA]
+RewriteRule ^api/company/employers/action/?$ api/company/action.php     [L,QSA]
+RewriteRule ^api/company/candidates/?$    api/company/candidates.php  [L,QSA]
+RewriteRule ^api/company/candidates/(\d+)/?$ api/company/candidates.php?id=$1 [L,QSA]

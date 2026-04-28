@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpeg" href="wooble_image/images.jpg">
-    <title>Jobs - register | Wooble</title>
+    <title>Create Account — Wooble Jobs</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -22,19 +22,19 @@
             justify-content: center;
             padding: 40px 16px;
         }
-        .wb-auth-card { max-width: 480px; }
+        .wb-auth-card { max-width: 520px; }
 
         .role-selector {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .role-option {
             border: 2px solid var(--border);
             border-radius: var(--radius-md);
-            padding: 16px;
+            padding: 16px 10px;
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
@@ -51,14 +51,32 @@
         }
 
         .role-option .role-icon { font-size: 28px; margin-bottom: 6px; }
+
         .role-option .role-name {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text-dark);
         }
+
         .role-option .role-desc {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .employer-fields {
+            background: var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .employer-fields h6 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
         }
     </style>
 </head>
@@ -67,9 +85,12 @@
 <!-- Navbar -->
 <nav class="wb-navbar navbar">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html" style="margin-left: -50px;">
-    <img src="wooble_image/wooble_logo_blue_1.png" alt="Wooble Jobs" style="height:30px; width:auto;">
-</a>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+            <img src="wooble_image/wooble_logo_blue_1.png" alt="Wooble Jobs" style="height:35px; width:auto;">
+            <span class="d-lg-none nav-link active" style="font-size:15px;color:var(--primary);font-weight:600; margin-top: 18px;">
+               <i class="bi bi-briefcase"></i>Jobs
+             </span>
+        </a>
         <a href="login.html" class="btn-wb-outline">Sign In</a>
     </div>
 </nav>
@@ -92,16 +113,27 @@
         <div class="wb-form-group">
             <label>I am a...</label>
             <div class="role-selector">
-                <div class="role-option selected" onclick="selectRole('candidate', this)">
+
+                <!-- Candidate -->
+                <div class="role-option selected"
+                     id="roleCandidate"
+                     onclick="selectRole('candidate', this)">
                     <div class="role-icon">👤</div>
                     <div class="role-name">Candidate</div>
                     <div class="role-desc">Looking for jobs</div>
                 </div>
-                <div class="role-option" onclick="selectRole('admin', this)">
+
+                <!-- Employer -->
+                <div class="role-option"
+                     id="roleEmployer"
+                     onclick="selectRole('employer', this)">
                     <div class="role-icon">🏢</div>
                     <div class="role-name">Employer</div>
                     <div class="role-desc">Hiring talent</div>
                 </div>
+
+            
+
             </div>
             <input type="hidden" id="selectedRole" value="candidate">
         </div>
@@ -109,6 +141,7 @@
         <!-- Form -->
         <form id="registerForm" onsubmit="handleRegister(event)">
 
+            <!-- Basic Fields -->
             <div class="wb-form-group">
                 <label>Full Name</label>
                 <input type="text" id="name" class="wb-form-control"
@@ -122,7 +155,9 @@
             </div>
 
             <div class="wb-form-group">
-                <label>Phone Number <span class="text-muted">(optional)</span></label>
+                <label>Phone Number
+                    <span class="text-muted">(optional)</span>
+                </label>
                 <input type="tel" id="phone" class="wb-form-control"
                        placeholder="9876543210">
             </div>
@@ -130,38 +165,117 @@
             <div class="wb-form-group">
                 <label>Password</label>
                 <div class="position-relative">
-                    <input type="password" id="password" class="wb-form-control"
-                           placeholder="Min 6 characters" required minlength="6">
+                    <input type="password" id="password"
+                           class="wb-form-control"
+                           placeholder="Min 6 characters"
+                           required minlength="6"
+                           oninput="checkStrength(this.value)">
                     <button type="button"
                             onclick="togglePassword('password', this)"
-                            style="position:absolute;right:14px;top:50%;transform:translateY(-50%);
-                                   background:none;border:none;color:var(--text-light);cursor:pointer;">
+                            style="position:absolute;right:14px;top:50%;
+                                   transform:translateY(-50%);background:none;
+                                   border:none;color:var(--text-light);cursor:pointer;">
                         <i class="bi bi-eye"></i>
                     </button>
+                </div>
+                <!-- Strength Bar -->
+                <div id="passwordStrength" style="display:none;margin-top:8px;">
+                    <div style="height:4px;border-radius:2px;background:var(--border);overflow:hidden;">
+                        <div id="strengthBar"
+                             style="height:100%;width:0;transition:all 0.3s;border-radius:2px;">
+                        </div>
+                    </div>
+                    <span id="strengthLabel"
+                          style="font-size:12px;color:var(--text-light);">
+                    </span>
                 </div>
             </div>
 
             <div class="wb-form-group">
                 <label>Confirm Password</label>
-                <input type="password" id="confirmPassword" class="wb-form-control"
+                <input type="password" id="confirmPassword"
+                       class="wb-form-control"
                        placeholder="Re-enter password" required>
             </div>
 
-            <!-- Password strength -->
-            <div id="passwordStrength" class="mb-3" style="display:none;">
-                <div style="height:4px;border-radius:2px;background:var(--border);overflow:hidden;">
-                    <div id="strengthBar" style="height:100%;width:0;transition:all 0.3s;border-radius:2px;"></div>
+            <!-- Employer Extra Fields -->
+            <div id="employerFields" style="display:none;">
+                <div class="employer-fields">
+                    <h6>🏢 Company Information</h6>
+
+                    <div class="wb-form-group">
+                        <label>Company Name <span class="text-danger">*</span></label>
+                        <input type="text" id="companyName"
+                               class="wb-form-control"
+                               placeholder="e.g. Tech Corp">
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Industry</label>
+                                <select id="industry" class="wb-form-control">
+                                    <option value="">Select Industry</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Retail">Retail</option>
+                                    <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Consulting">Consulting</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="wb-form-group">
+                                <label>Location</label>
+                                <input type="text" id="companyLocation"
+                                       class="wb-form-control"
+                                       placeholder="e.g. Bhubaneswar">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wb-form-group">
+                        <label>Website</label>
+                        <input type="url" id="website"
+                               class="wb-form-control"
+                               placeholder="https://yourcompany.com">
+                    </div>
+
+                    <div class="wb-form-group mb-0">
+                        <label>Company Description</label>
+                        <textarea id="description"
+                                  class="wb-form-control"
+                                  rows="2"
+                                  placeholder="Brief description about your company...">
+                        </textarea>
+                    </div>
                 </div>
-                <span id="strengthLabel" style="font-size:12px;color:var(--text-light);"></span>
+
+                <!-- Pending notice -->
+                <div style="background:#fef9c3;border:1px solid #fde047;
+                            border-radius:var(--radius-sm);padding:12px 16px;
+                            margin-bottom:20px;">
+                    <p style="font-size:13px;color:#854d0e;margin:0;">
+                        ⚠️ <strong>Note:</strong> Your employer account will need
+                        approval from Wooble before you can post jobs.
+                    </p>
+                </div>
             </div>
 
-            <button type="submit" class="btn-wb-primary w-100 py-3 mt-2" id="registerBtn">
+            <button type="submit"
+                    class="btn-wb-primary w-100 py-3 mt-2"
+                    id="registerBtn">
                 Create Account
             </button>
 
         </form>
 
-        <p class="text-center mt-4 mb-0" style="font-size:14px;color:var(--text-light);">
+        <p class="text-center mt-4 mb-0"
+           style="font-size:14px;color:var(--text-light);">
             Already have an account?
             <a href="login.html" class="fw-600">Sign in</a>
         </p>
@@ -171,7 +285,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/config.js"></script>
-<script src="assets/js/auth.js"></script>
 <script>
 
     let selectedRole = "candidate";
@@ -179,21 +292,30 @@
     // Redirect if already logged in
     document.addEventListener("DOMContentLoaded", () => {
         if (Auth.isLoggedIn()) {
-            window.location.href = Auth.isAdmin()
-                ? "admin/dashboard.html"
-                : "candidate/dashboard.html";
+            redirectToDashboard();
         }
-
-        // Password strength checker
-        document.getElementById("password").addEventListener("input", checkStrength);
     });
 
     // ── Select Role ───────────────────────
     function selectRole(role, el) {
         selectedRole = role;
         document.getElementById("selectedRole").value = role;
-        document.querySelectorAll(".role-option").forEach(o => o.classList.remove("selected"));
+
+        // Reset all options
+        document.querySelectorAll(".role-option").forEach(o => {
+            o.classList.remove("selected");
+        });
         el.classList.add("selected");
+
+        // Show/hide employer fields
+        const empFields = document.getElementById("employerFields");
+        if (role === "employer") {
+            empFields.style.display = "block";
+            document.getElementById("companyName").required = true;
+        } else {
+            empFields.style.display = "none";
+            document.getElementById("companyName").required = false;
+        }
     }
 
     // ── Handle Register ───────────────────
@@ -213,13 +335,28 @@
             return;
         }
 
+        // Build payload
+        const payload = { name, email, password, role: selectedRole, phone };
+
+        // Add employer fields
+        if (selectedRole === "employer") {
+            const companyName = document.getElementById("companyName").value.trim();
+            if (!companyName) {
+                showAlert("authAlert", "Company name is required", "danger");
+                return;
+            }
+            payload.company_name = companyName;
+            payload.website      = document.getElementById("website").value.trim();
+            payload.industry     = document.getElementById("industry").value;
+            payload.location     = document.getElementById("companyLocation").value.trim();
+            payload.description  = document.getElementById("description").value.trim();
+        }
+
         // Loading state
         btn.innerHTML = '<span class="wb-spinner"></span> Creating account...';
         btn.disabled  = true;
 
-        const { status, data } = await apiRequest("/auth/register", "POST", {
-            name, email, password, role: selectedRole, phone
-        });
+        const { data } = await apiRequest("/auth/register", "POST", payload);
 
         btn.innerHTML = "Create Account";
         btn.disabled  = false;
@@ -229,19 +366,37 @@
             return;
         }
 
+        // Employer pending — don't login yet
+        if (selectedRole === "employer") {
+            showAlert("authAlert",
+                "✅ Account created! Waiting for Wooble approval before you can login.",
+                "success");
+            setTimeout(() => {
+                window.location.href = "/frontend/login.html";
+            }, 3000);
+            return;
+        }
+
         // Save token & user
         Auth.setToken(data.data.token);
         Auth.setUser(data.data.user);
 
-        showAlert("authAlert", "Account created successfully! Redirecting...", "success");
+        showAlert("authAlert", "Account created! Redirecting...", "success");
 
-        setTimeout(() => {
-            if (Auth.isAdmin()) {
-                window.location.href = "admin/dashboard.html";
-            } else {
-                window.location.href = "candidate/dashboard.html";
-            }
-        }, 1200);
+        setTimeout(() => redirectToDashboard(), 1200);
+    }
+
+    // ── Redirect based on role ────────────
+    function redirectToDashboard() {
+        const user = Auth.getUser();
+        if (!user) return;
+        if (user.role === "company") {
+            window.location.href = "/frontend/company/dashboard.html";
+        } else if (user.role === "employer") {
+            window.location.href = "/frontend/employer/dashboard.html";
+        } else {
+            window.location.href = "/frontend/candidate/dashboard.html";
+        }
     }
 
     // ── Toggle Password ───────────────────
@@ -257,20 +412,19 @@
     }
 
     // ── Password Strength ─────────────────
-    function checkStrength() {
-        const val = document.getElementById("password").value;
-        const bar = document.getElementById("strengthBar");
-        const lbl = document.getElementById("strengthLabel");
+    function checkStrength(val) {
+        const bar  = document.getElementById("strengthBar");
+        const lbl  = document.getElementById("strengthLabel");
         const wrap = document.getElementById("passwordStrength");
 
         if (!val) { wrap.style.display = "none"; return; }
         wrap.style.display = "block";
 
         let score = 0;
-        if (val.length >= 6)  score++;
-        if (val.length >= 10) score++;
-        if (/[A-Z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
+        if (val.length >= 6)            score++;
+        if (val.length >= 10)           score++;
+        if (/[A-Z]/.test(val))         score++;
+        if (/[0-9]/.test(val))         score++;
         if (/[^A-Za-z0-9]/.test(val)) score++;
 
         const levels = [
@@ -281,11 +435,11 @@
             { w: "100%", color: "#16a34a", label: "Very Strong" }
         ];
 
-        const level       = levels[Math.min(score, 4)];
-        bar.style.width   = level.w;
+        const level          = levels[Math.min(score, 4)];
+        bar.style.width      = level.w;
         bar.style.background = level.color;
-        lbl.textContent   = level.label;
-        lbl.style.color   = level.color;
+        lbl.textContent      = level.label;
+        lbl.style.color      = level.color;
     }
 
 </script>

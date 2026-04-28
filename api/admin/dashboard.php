@@ -14,24 +14,33 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
 require_once __DIR__ . "/../config/database.php";
 require_once __DIR__ . "/../middleware/auth.php";
 
-// --- Admin only ---
-$admin = requireAdmin();
+// --- Employer or Company ---
+$user = requireEmployerOrCompany();
 
 $db = (new Database())->getConnection();
 
+// Company sees all data, Employer sees own only
+$isCompany = $user["role"] === "company";
+$filterJobs = $isCompany ? "" : "WHERE j.posted_by = :posted_by";
+$filterParams = $isCompany ? [] : [":posted_by" => $user["user_id"]];
+
 // --- Total Jobs ---
 $stmt = $db->prepare("
-    SELECT 
+    SELECT
         COUNT(*) AS total_jobs,
         SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_jobs,
         SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) AS closed_jobs
-    FROM jobs
-    WHERE admin_id = :admin_id
+    FROM jobs j
+    {$filterJobs}
 ");
-$stmt->execute([":admin_id" => $admin["user_id"]]);
+$stmt->execute($filterParams);
 $jobStats = $stmt->fetch();
 
 // --- Total Applications ---
+$appFilter = $isCompany
+    ? ""
+    : "WHERE j.posted_by = :posted_by";
+
 $stmt = $db->prepare("
     SELECT
         COUNT(*)  AS total_applications,
@@ -41,9 +50,9 @@ $stmt = $db->prepare("
         SUM(CASE WHEN a.status = 'rejected'    THEN 1 ELSE 0 END) AS rejected
     FROM applications a
     JOIN jobs j ON a.job_id = j.id
-    WHERE j.admin_id = :admin_id
+    {$appFilter}
 ");
-$stmt->execute([":admin_id" => $admin["user_id"]]);
+$stmt->execute($filterParams);
 $appStats = $stmt->fetch();
 
 // --- Total Candidates ---
@@ -51,22 +60,24 @@ $stmt = $db->prepare("
     SELECT COUNT(DISTINCT a.candidate_id) AS total_candidates
     FROM applications a
     JOIN jobs j ON a.job_id = j.id
-    WHERE j.admin_id = :admin_id
+    {$appFilter}
 ");
-$stmt->execute([":admin_id" => $admin["user_id"]]);
+$stmt->execute($filterParams);
 $candidateStats = $stmt->fetch();
 
 // --- Total Invitations ---
+$invFilter = $isCompany ? "" : "WHERE j.posted_by = :posted_by";
 $stmt = $db->prepare("
     SELECT COUNT(*) AS total_invitations
     FROM invitations i
     JOIN jobs j ON i.job_id = j.id
-    WHERE j.admin_id = :admin_id
+    {$invFilter}
 ");
-$stmt->execute([":admin_id" => $admin["user_id"]]);
+$stmt->execute($filterParams);
 $invitationStats = $stmt->fetch();
 
-// --- Recent Applications (last 5) ---
+// --- Recent Applications ---
+$recentFilter = $isCompany ? "" : "WHERE j.posted_by = :posted_by";
 $stmt = $db->prepare("
     SELECT
         a.id            AS application_id,
@@ -78,14 +89,15 @@ $stmt = $db->prepare("
     FROM applications a
     JOIN jobs j ON a.job_id = j.id
     JOIN users u ON a.candidate_id = u.id
-    WHERE j.admin_id = :admin_id
+    {$recentFilter}
     ORDER BY a.applied_at DESC
     LIMIT 5
 ");
-$stmt->execute([":admin_id" => $admin["user_id"]]);
+$stmt->execute($filterParams);
 $recentApplications = $stmt->fetchAll();
 
-// --- Top Jobs by Applications ---
+// --- Top Jobs ---
+$topFilter = $isCompany ? "" : "WHERE j.posted_by = :posted_by";
 $stmt = $db->prepare("
     SELECT
         j.id,
@@ -95,36 +107,38 @@ $stmt = $db->prepare("
         COUNT(a.id) AS total_applications
     FROM jobs j
     LEFT JOIN applications a ON j.id = a.job_id
-    WHERE j.admin_id = :admin_id
+    {$topFilter}
     GROUP BY j.id
     ORDER BY total_applications DESC
     LIMIT 5
 ");
-$stmt->execute([":admin_id" => $admin["user_id"]]);
+$stmt->execute($filterParams);
 $topJobs = $stmt->fetchAll();
 
-// --- Applications per day (last 7 days) ---
+// --- Daily Stats ---
+$dailyFilter = $isCompany ? "" : "WHERE j.posted_by = :posted_by";
 $stmt = $db->prepare("
     SELECT
         DATE(a.applied_at) AS date,
         COUNT(*)           AS count
     FROM applications a
     JOIN jobs j ON a.job_id = j.id
-    WHERE j.admin_id = :admin_id
+    {$dailyFilter}
     AND a.applied_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
     GROUP BY DATE(a.applied_at)
     ORDER BY date ASC
 ");
-$stmt->execute([":admin_id" => $admin["user_id"]]);
+$stmt->execute($filterParams);
 $dailyStats = $stmt->fetchAll();
 
 echo json_encode([
     "success" => true,
     "message" => "Dashboard data fetched successfully",
     "data"    => [
-        "admin" => [
-            "id"   => $admin["user_id"],
-            "name" => $admin["name"]
+        "user" => [
+            "id"   => $user["user_id"],
+            "name" => $user["name"],
+            "role" => $user["role"]
         ],
         "overview" => [
             "total_jobs"         => (int)$jobStats["total_jobs"],

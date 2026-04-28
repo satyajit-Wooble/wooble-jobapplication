@@ -50,7 +50,7 @@ $stmt = $db->prepare("
         j.description     AS job_description,
         j.requirements    AS job_requirements,
         j.status          AS job_status,
-        j.admin_id,
+        j.posted_by,
         u.id              AS candidate_id,
         u.name            AS candidate_name,
         u.email           AS candidate_email,
@@ -85,7 +85,7 @@ if ($user["role"] === "candidate" && $application["candidate_id"] != $user["user
     exit();
 }
 
-if ($user["role"] === "admin" && $application["admin_id"] != $user["user_id"]) {
+if ($user["role"] === "admin" && $application["posted_by"] != $user["user_id"]) {
     http_response_code(403);
     echo json_encode([
         "success" => false,

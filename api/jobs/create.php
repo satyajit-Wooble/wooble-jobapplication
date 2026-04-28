@@ -14,8 +14,8 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 require_once __DIR__ . "/../config/database.php";
 require_once __DIR__ . "/../middleware/auth.php";
 
-// --- Admin only ---
-$admin = requireAdmin();
+// --- Employer or Company only ---
+$user = requireEmployerOrCompany();
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -65,13 +65,17 @@ if (!in_array($status, ["active", "closed"])) {
 $db   = (new Database())->getConnection();
 $stmt = $db->prepare("
     INSERT INTO jobs 
-        (admin_id, title, company, location, job_type, description, requirements, salary_min, salary_max, status, created_at)
+        (posted_by, title, company, location, job_type, 
+         description, requirements, salary_min, salary_max, 
+         status, created_at)
     VALUES 
-        (:admin_id, :title, :company, :location, :job_type, :description, :requirements, :salary_min, :salary_max, :status, NOW())
+        (:posted_by, :title, :company, :location, :job_type, 
+         :description, :requirements, :salary_min, :salary_max, 
+         :status, NOW())
 ");
 
 $stmt->execute([
-    ":admin_id"     => $admin["user_id"],
+    ":posted_by"    => $user["user_id"],
     ":title"        => $title,
     ":company"      => $company,
     ":location"     => $location,
@@ -101,7 +105,8 @@ echo json_encode([
             "salary_min"   => $salary_min,
             "salary_max"   => $salary_max,
             "status"       => $status,
-            "posted_by"    => $admin["name"]
+            "posted_by"    => $user["name"],
+            "role"         => $user["role"]
         ]
     ]
 ]);

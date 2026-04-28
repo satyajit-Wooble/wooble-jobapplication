@@ -20,7 +20,7 @@
             <img src="wooble_image/wooble_logo_blue_1.png" alt="Wooble Jobs" style="height:35px; width:auto;">
             <span class="d-lg-none nav-link active" style="font-size:15px;color:var(--primary);font-weight:600; margin-top: 18px;">
                <i class="bi bi-briefcase"></i>Jobs
-    </span>
+            </span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="margin-left:12px;">
            <span class="navbar-toggler-icon"></span>
@@ -205,28 +205,15 @@
     <h6>For Candidates</h6>
     <ul>
         <li><a href="index.html">Browse Jobs</a></li>
-        <li><a href="#" onclick="window.location.href = Auth.isLoggedIn() ? (Auth.isAdmin() ? 'admin/dashboard.html' : 'candidate/dashboard.html') : 'register.html'">Create Account</a></li>
-        <li><a href="#" onclick="window.location.href = Auth.isLoggedIn() ? 'candidate/dashboard.html#applications' : 'login.html'">My Applications</a></li>
+        <li><a href="/frontend/register.html">Create Account</a></li>
+        <li><a href="#" onclick="goToMyApplications()">My Applications</a></li>
     </ul>
 </div>
 <div class="col-lg-2 col-6">
     <h6>For Employers</h6>
     <ul>
-        <li><a href="#" onclick="
-    if(Auth.isLoggedIn() && !Auth.isAdmin()) {
-        alert('This section is for employers only.');
-    } else {
-        window.location.href = Auth.isLoggedIn() ? 'admin/dashboard.html' : 'register.html';
-    }
-">Post a Job</a></li>
-
-<li><a href="#" onclick="
-    if(Auth.isLoggedIn() && !Auth.isAdmin()) {
-        alert('This section is for employers only.');
-    } else {
-        window.location.href = Auth.isLoggedIn() ? 'admin/dashboard.html' : 'login.html';
-    }
-">Admin Panel</a></li>
+        <li><a href="#" onclick="goToPostJob()">Post a Job</a></li>
+        <li><a href="#" onclick="goToAdminPanel()">Admin Panel</a></li>
     </ul>
 </div>
             <div class="col-lg-4">
@@ -263,14 +250,18 @@
 
     // ── Dashboard Link ────────────────────
     function setupDashboardLink() {
-        const link = document.getElementById("dashboardLink");
-        if (!link) return;
-        if (Auth.isAdmin()) {
-            link.href = "admin/dashboard.html";
-        } else {
-            link.href = "candidate/dashboard.html";
-        }
+    const link = document.getElementById("dashboardLink");
+    if (!link) return;
+    const user = Auth.getUser();
+    if (!user) return;
+    if (user.role === "company") {
+        link.href = "/frontend/company/dashboard.html";
+    } else if (user.role === "employer") {
+        link.href = "/frontend/employer/dashboard.html";
+    } else {
+        link.href = "/frontend/candidate/dashboard.html";
     }
+}
 
     // ── Load Jobs ─────────────────────────
     async function loadJobs(page = 1) {
@@ -404,6 +395,44 @@
             if (e.key === "Enter") searchJobs();
         });
     });
+
+    function goToPostJob() {
+    const u = Auth.getUser();
+    if (Auth.isLoggedIn() && u) {
+        if (u.role === "employer") {
+            window.location.href = "/frontend/employer/jobs.html";
+        } else if (u.role === "company") {
+            window.location.href = "/frontend/company/jobs.html";
+        } else {
+            window.location.href = "/frontend/register.html";
+        }
+    } else {
+        window.location.href = "/frontend/register.html";
+    }
+}
+
+function goToAdminPanel() {
+    const u = Auth.getUser();
+    if (Auth.isLoggedIn() && u) {
+        if (u.role === "company") {
+            window.location.href = "/frontend/company/dashboard.html";
+        } else if (u.role === "employer") {
+            window.location.href = "/frontend/employer/dashboard.html";
+        } else {
+            window.location.href = "/frontend/login.html";
+        }
+    } else {
+        window.location.href = "/frontend/login.html";
+    }
+}
+
+function goToMyApplications() {
+    if (Auth.isLoggedIn()) {
+        window.location.href = "/frontend/candidate/dashboard.html";
+    } else {
+        window.location.href = "/frontend/login.html";
+    }
+}
 </script>
 </body>
 </html>

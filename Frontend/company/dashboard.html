@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Auth Guard -->
+    <script>
+        (function() {
+            const token = localStorage.getItem("wooble_token");
+            const user  = JSON.parse(localStorage.getItem("wooble_user") || "null");
+            if (!token || !user || user.role !== "company") {
+                localStorage.removeItem("wooble_token");
+                localStorage.removeItem("wooble_user");
+                window.location.replace("/frontend/login.html");
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
-    <title>Jobs - Admin | Wooble</title>
+    <title>Dashoard Admin || Wooble Admin </title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -12,7 +24,7 @@
         body { background: var(--bg-light); }
 
         .wb-sidebar {
-            background: var(--navy);
+            background: #0f172a;
             min-height: 100vh;
             width: 240px;
             position: fixed;
@@ -35,7 +47,7 @@
         .sidebar-user .avatar {
             width: 40px;
             height: 40px;
-            background: var(--primary);
+            background: #f59e0b;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -64,12 +76,18 @@
         .sidebar-nav a.active {
             background: rgba(255,255,255,0.08);
             color: var(--white);
-            border-right: 3px solid var(--accent);
+            border-right: 3px solid #f59e0b;
         }
 
-        .sidebar-nav a.active {
+        .sidebar-nav a.active { font-weight: 700; color: var(--white); }
+
+        .sidebar-nav .nav-section {
+            padding: 16px 24px 8px;
+            font-size: 10px;
             font-weight: 700;
-            color: var(--white);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #475569;
         }
 
         .sidebar-footer {
@@ -91,12 +109,21 @@
             z-index: 50;
         }
 
+        .company-crown {
+            background: #fef9c3;
+            border: 1px solid #fde047;
+            border-radius: var(--radius-pill);
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #854d0e;
+        }
+
         .chart-bar {
             display: flex;
             align-items: flex-end;
             gap: 8px;
             height: 120px;
-            padding: 0 8px;
         }
 
         .chart-bar-item {
@@ -115,17 +142,13 @@
             border-radius: 4px 4px 0 0;
             min-height: 4px;
             transition: height 0.5s ease;
-            position: relative;
         }
 
-        .chart-bar-fill:hover {
-            background: var(--primary-dark);
-        }
+        .chart-bar-fill:hover { background: var(--primary-dark); }
 
         .chart-bar-label {
             font-size: 10px;
             color: var(--text-light);
-            text-align: center;
         }
 
         .chart-bar-value {
@@ -133,16 +156,6 @@
             font-weight: 700;
             color: var(--primary);
         }
-
-        .recent-app-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .recent-app-row:last-child { border-bottom: none; }
 
         @media(max-width:768px) {
             .wb-sidebar { display: none; }
@@ -152,76 +165,86 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     SIDEBAR
-══════════════════════════════════════════ -->
+<!-- ══ SIDEBAR ══════════════════════════════ -->
 <div class="wb-sidebar">
-
-    <!-- Brand -->
     <div class="sidebar-brand">
         <a href="../index.html" style="text-decoration:none;">
-            <span style="font-size:18px;font-weight:800;color:var(--white);">Wooble Jobs</span>
+            <span style="font-size:18px;font-weight:800;color:var(--white);">
+                 Wooble Admin 👑
+            </span>
         </a>
-        <div style="font-size:11px;color:#64748b;margin-top:4px;">Admin Panel</div>
+        <div style="font-size:11px;color:#475569;margin-top:4px;">
+            Company Super Panel
+        </div>
     </div>
 
-    <!-- User Info -->
     <div class="sidebar-user">
         <div class="d-flex align-items-center gap-3">
-            <div class="avatar" id="sidebarAvatar">A</div>
+            <div class="avatar" id="sidebarAvatar">W</div>
             <div>
                 <div style="font-size:14px;font-weight:700;color:var(--white);"
                      id="sidebarName">Loading...</div>
-                <div style="font-size:12px;color:#64748b;">Administrator</div>
+                <div style="font-size:12px;color:#f59e0b;font-weight:600;">
+                     Company Admin 👑
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Nav -->
     <nav class="sidebar-nav">
+        <div class="nav-section">Overview</div>
         <a href="dashboard.html" class="active">
             <i class="bi bi-grid"></i> Dashboard
         </a>
+
+        <div class="nav-section">Manage</div>
+        <a href="employers.html">
+            <i class="bi bi-building"></i> Employers
+        </a>
         <a href="jobs.html">
-            <i class="bi bi-briefcase"></i> Manage Jobs
+            <i class="bi bi-briefcase"></i> All Jobs
         </a>
         <a href="applications.html">
-            <i class="bi bi-file-text"></i> Applications
+            <i class="bi bi-file-text"></i> All Applications
         </a>
+        <a href="candidates.html">
+            <i class="bi bi-people"></i> Candidates
+        </a>
+
+        <div class="nav-section">Site</div>
         <a href="../index.html">
             <i class="bi bi-eye"></i> View Site
         </a>
     </nav>
 
-    <!-- Footer -->
     <div class="sidebar-footer">
         <button onclick="Auth.logout()"
-                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
-                       color:#94a3b8;border-radius:var(--radius-pill);padding:9px 16px;
-                       font-size:13px;width:100%;cursor:pointer;transition:all 0.2s;"
-                onmouseover="this.style.color='white'"
-                onmouseout="this.style.color='#94a3b8'">
+                style="background:rgba(255,255,255,0.08);
+                       border:1px solid rgba(255,255,255,0.15);
+                       color:#94a3b8;border-radius:var(--radius-pill);
+                       padding:9px 16px;font-size:13px;width:100%;
+                       cursor:pointer;">
             <i class="bi bi-box-arrow-left"></i> Logout
         </button>
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MAIN CONTENT
-══════════════════════════════════════════ -->
+<!-- ══ MAIN ══════════════════════════════════ -->
 <div class="wb-main">
 
     <!-- Topbar -->
     <div class="wb-topbar">
         <div>
-            <h5 style="margin:0;font-weight:700;">Dashboard</h5>
+            <h5 style="margin:0;font-weight:700;">Company Dashboard</h5>
             <p class="text-muted mb-0" style="font-size:13px;">
-                Welcome back, <span id="topbarName"></span>!
+                Welcome back, <span id="topbarName"></span>! 👑
             </p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="jobs.html?action=new" class="btn-wb-primary" style="font-size:13px;padding:9px 18px;">
-               <i class="bi bi-plus"></i> Post New Job
+        <div class="d-flex gap-2 align-items-center">
+            <span class="company-crown">👑 Company Admin</span>
+            <a href="employers.html" class="btn-wb-primary"
+               style="font-size:13px;padding:9px 18px;">
+                <i class="bi bi-building"></i> Manage Employers
             </a>
         </div>
     </div>
@@ -232,7 +255,7 @@
         <!-- Alert -->
         <div id="pageAlert" class="wb-alert"></div>
 
-        <!-- ── OVERVIEW STATS ──────────────── -->
+        <!-- Stats Row 1 -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-lg-3">
                 <div class="wb-stat-card">
@@ -257,7 +280,7 @@
                     <div class="icon icon-yellow">📋</div>
                     <div>
                         <div class="stat-number" id="statTotalApps">—</div>
-                        <div class="stat-label">Total Applications</div>
+                        <div class="stat-label">Applications</div>
                     </div>
                 </div>
             </div>
@@ -272,14 +295,14 @@
             </div>
         </div>
 
-        <!-- ── SECOND ROW STATS ───────────── -->
+        <!-- Stats Row 2 -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-lg-3">
                 <div class="wb-stat-card">
                     <div class="icon icon-yellow">🕐</div>
                     <div>
                         <div class="stat-number" id="statPending">—</div>
-                        <div class="stat-label">Pending Review</div>
+                        <div class="stat-label">Pending</div>
                     </div>
                 </div>
             </div>
@@ -312,53 +335,69 @@
             </div>
         </div>
 
-        <!-- ── CHARTS & TABLES ROW ────────── -->
+        <!-- Charts Row -->
         <div class="row g-4 mb-4">
 
-            <!-- Daily Applications Chart -->
+            <!-- Daily Chart -->
             <div class="col-lg-6">
                 <div class="wb-stat-card flex-column align-items-start">
                     <div class="d-flex justify-content-between w-100 mb-4">
                         <div>
-                            <h6 style="font-weight:700;margin:0;">Applications This Week</h6>
-                            <p style="font-size:12px;color:var(--text-light);margin:0;">Daily application count</p>
+                            <h6 style="font-weight:700;margin:0;">
+                                Applications This Week
+                            </h6>
+                            <p style="font-size:12px;color:var(--text-light);margin:0;">
+                                Daily count
+                            </p>
                         </div>
                         <span class="wb-badge wb-badge-blue">Last 7 Days</span>
                     </div>
                     <div class="chart-bar w-100" id="dailyChart">
-                        <div class="text-center w-100 text-muted" style="font-size:13px;">Loading...</div>
+                        <div class="text-center w-100 text-muted"
+                             style="font-size:13px;">Loading...</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Application Status Donut -->
+            <!-- Status Chart -->
             <div class="col-lg-6">
                 <div class="wb-stat-card flex-column align-items-start">
                     <div class="mb-4">
-                        <h6 style="font-weight:700;margin:0;">Application Status Overview</h6>
-                        <p style="font-size:12px;color:var(--text-light);margin:0;">Distribution by status</p>
+                        <h6 style="font-weight:700;margin:0;">
+                            Application Status
+                        </h6>
+                        <p style="font-size:12px;color:var(--text-light);margin:0;">
+                            Distribution overview
+                        </p>
                     </div>
                     <div id="statusChart" class="w-100">
-                        <div class="text-center text-muted" style="font-size:13px;">Loading...</div>
+                        <div class="text-center text-muted"
+                             style="font-size:13px;">Loading...</div>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- ── BOTTOM ROW ─────────────────── -->
+        <!-- Bottom Row -->
         <div class="row g-4">
 
             <!-- Recent Applications -->
             <div class="col-lg-7">
                 <div class="wb-stat-card flex-column align-items-start">
                     <div class="d-flex justify-content-between w-100 mb-3">
-                        <h6 style="font-weight:700;margin:0;">Recent Applications</h6>
+                        <h6 style="font-weight:700;margin:0;">
+                            Recent Applications
+                        </h6>
                         <a href="applications.html"
-                           style="font-size:13px;font-weight:600;">View All →</a>
+                           style="font-size:13px;font-weight:600;">
+                            View All →
+                        </a>
                     </div>
                     <div id="recentApps" class="w-100">
-                        <div class="text-center py-4 text-muted">Loading...</div>
+                        <div class="text-center py-4 text-muted">
+                            Loading...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -369,48 +408,53 @@
                     <div class="d-flex justify-content-between w-100 mb-3">
                         <h6 style="font-weight:700;margin:0;">Top Jobs</h6>
                         <a href="jobs.html"
-                           style="font-size:13px;font-weight:600;">Manage →</a>
+                           style="font-size:13px;font-weight:600;">
+                            View All →
+                        </a>
                     </div>
                     <div id="topJobs" class="w-100">
-                        <div class="text-center py-4 text-muted">Loading...</div>
+                        <div class="text-center py-4 text-muted">
+                            Loading...
+                        </div>
                     </div>
                 </div>
             </div>
 
         </div>
-
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/config.js"></script>
-<script src="../assets/js/applications.js"></script>
 <script>
 
-    // ── On Load ───────────────────────────
-    document.addEventListener("DOMContentLoaded", () => {
-        if (!requireAuth("admin")) return;
+    document.addEventListener("DOMContentLoaded", async () => {
+        if (!requireAuth("company")) return;
 
         const user = Auth.getUser();
-        document.getElementById("sidebarName").textContent   = user.name;
-        document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
-        document.getElementById("topbarName").textContent    = user.name;
+        if (user) {
+            document.getElementById("sidebarName").textContent   = user.name;
+            document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+            document.getElementById("topbarName").textContent    = user.name;
+        }
 
-        loadDashboard();
+        await loadDashboard();
     });
 
-    // ── Load Dashboard ────────────────────
     async function loadDashboard() {
-        const { data } = await apiRequest("/admin/dashboard", "GET", null, true);
+        const { data } = await apiRequest(
+            "/admin/dashboard", "GET", null, true
+        );
 
         if (!data.success) {
-            showAlert("pageAlert", "Failed to load dashboard: " + data.message, "danger");
+            showAlert("pageAlert",
+                "Failed to load dashboard: " + data.message, "danger");
             return;
         }
 
         const d = data.data;
 
-        // ── Overview Stats ────────────────
+        // Stats
         document.getElementById("statTotalJobs").textContent  = d.overview.total_jobs;
         document.getElementById("statActiveJobs").textContent = d.overview.active_jobs;
         document.getElementById("statTotalApps").textContent  = d.overview.total_applications;
@@ -420,24 +464,17 @@
         document.getElementById("statInvited").textContent    = d.application_stats.invited;
         document.getElementById("statRejected").textContent   = d.application_stats.rejected;
 
-        // ── Daily Chart ───────────────────
+        // Charts
         renderDailyChart(d.daily_stats);
-
-        // ── Status Chart ──────────────────
         renderStatusChart(d.application_stats);
-
-        // ── Recent Applications ───────────
         renderRecentApps(d.recent_applications);
-
-        // ── Top Jobs ──────────────────────
         renderTopJobs(d.top_jobs);
     }
 
-    // ── Daily Chart ───────────────────────
     function renderDailyChart(dailyStats) {
         if (!dailyStats || dailyStats.length === 0) {
-            document.getElementById("dailyChart").innerHTML =
-                `<div class="wb-empty-state" style="padding:20px;">
+            document.getElementById("dailyChart").innerHTML = `
+                <div class="wb-empty-state" style="padding:20px;">
                     <div class="icon" style="font-size:32px;">📊</div>
                     <h5 style="font-size:14px;">No data yet</h5>
                 </div>`;
@@ -450,26 +487,29 @@
             <div class="chart-bar w-100">
                 ${dailyStats.map(d => {
                     const pct  = Math.round((d.count / max) * 100);
-                    const date = new Date(d.date).toLocaleDateString("en-IN", { weekday: "short" });
+                    const date = new Date(d.date).toLocaleDateString(
+                        "en-IN", { weekday: "short" }
+                    );
                     return `
                     <div class="chart-bar-item">
                         <div class="chart-bar-value">${d.count}</div>
-                        <div class="chart-bar-fill" style="height:${Math.max(pct, 4)}%;"
-                             title="${d.date}: ${d.count} applications"></div>
+                        <div class="chart-bar-fill"
+                             style="height:${Math.max(pct, 4)}%;"
+                             title="${d.date}: ${d.count}">
+                        </div>
                         <div class="chart-bar-label">${date}</div>
                     </div>`;
                 }).join("")}
             </div>`;
     }
 
-    // ── Status Chart ──────────────────────
     function renderStatusChart(stats) {
-        const total = (stats.pending || 0) + (stats.shortlisted || 0) +
-                      (stats.invited || 0) + (stats.rejected || 0);
+        const total = (stats.pending    || 0) + (stats.shortlisted || 0) +
+                      (stats.invited    || 0) + (stats.rejected    || 0);
 
         if (total === 0) {
-            document.getElementById("statusChart").innerHTML =
-                `<div class="wb-empty-state" style="padding:20px;">
+            document.getElementById("statusChart").innerHTML = `
+                <div class="wb-empty-state" style="padding:20px;">
                     <div class="icon" style="font-size:32px;">📋</div>
                     <h5 style="font-size:14px;">No applications yet</h5>
                 </div>`;
@@ -491,23 +531,28 @@
                     <span style="font-size:13px;font-weight:600;">
                         ${item.icon} ${item.label}
                     </span>
-                    <span style="font-size:13px;font-weight:700;color:var(--text-dark);">
-                        ${item.value} <span style="color:var(--text-light);font-weight:400;">(${pct}%)</span>
+                    <span style="font-size:13px;font-weight:700;">
+                        ${item.value}
+                        <span style="color:var(--text-light);font-weight:400;">
+                            (${pct}%)
+                        </span>
                     </span>
                 </div>
-                <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
-                    <div style="height:100%;width:${pct}%;background:${item.color};
-                                border-radius:4px;transition:width 0.5s ease;"></div>
+                <div style="height:8px;background:var(--border);
+                            border-radius:4px;overflow:hidden;">
+                    <div style="height:100%;width:${pct}%;
+                                background:${item.color};border-radius:4px;
+                                transition:width 0.5s ease;">
+                    </div>
                 </div>
             </div>`;
         }).join("");
     }
 
-    // ── Recent Applications ───────────────
     function renderRecentApps(apps) {
         if (!apps || apps.length === 0) {
-            document.getElementById("recentApps").innerHTML =
-                `<div class="wb-empty-state" style="padding:20px;">
+            document.getElementById("recentApps").innerHTML = `
+                <div class="wb-empty-state" style="padding:20px;">
                     <div class="icon" style="font-size:32px;">📋</div>
                     <h5 style="font-size:14px;">No applications yet</h5>
                 </div>`;
@@ -515,16 +560,21 @@
         }
 
         document.getElementById("recentApps").innerHTML = apps.map(app => `
-            <div class="recent-app-row">
+            <div class="d-flex align-items-center justify-content-between py-3"
+                 style="border-bottom:1px solid var(--border);">
                 <div class="d-flex align-items-center gap-3">
-                    <div style="width:36px;height:36px;background:var(--primary-light);
-                                border-radius:50%;display:flex;align-items:center;
-                                justify-content:center;font-weight:700;color:var(--primary);
-                                font-size:14px;flex-shrink:0;">
+                    <div style="width:36px;height:36px;
+                                background:var(--primary-light);
+                                border-radius:50%;display:flex;
+                                align-items:center;justify-content:center;
+                                font-weight:700;color:var(--primary);
+                                font-size:14px;">
                         ${app.candidate_name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <div style="font-size:14px;font-weight:700;">${app.candidate_name}</div>
+                        <div style="font-size:14px;font-weight:700;">
+                            ${app.candidate_name}
+                        </div>
                         <div style="font-size:12px;color:var(--text-light);">
                             ${app.job_title} · ${formatDate(app.applied_at)}
                         </div>
@@ -533,22 +583,20 @@
                 <div class="d-flex align-items-center gap-2">
                     ${statusBadge(app.status)}
                     <a href="applications.html"
-                       style="font-size:12px;color:var(--primary);font-weight:600;">
+                       style="font-size:12px;color:var(--primary);
+                              font-weight:600;">
                         Review →
                     </a>
                 </div>
             </div>`).join("");
     }
 
-    // ── Top Jobs ──────────────────────────
     function renderTopJobs(jobs) {
         if (!jobs || jobs.length === 0) {
-            document.getElementById("topJobs").innerHTML =
-                `<div class="wb-empty-state" style="padding:20px;">
+            document.getElementById("topJobs").innerHTML = `
+                <div class="wb-empty-state" style="padding:20px;">
                     <div class="icon" style="font-size:32px;">💼</div>
-                    <h5 style="font-size:14px;">No jobs posted yet</h5>
-                    <a href="jobs.html" class="btn-wb-primary mt-2"
-                       style="font-size:13px;padding:8px 16px;">Post a Job</a>
+                    <h5 style="font-size:14px;">No jobs yet</h5>
                 </div>`;
             return;
         }
@@ -557,42 +605,35 @@
             <div class="d-flex align-items-center justify-content-between py-3"
                  style="border-bottom:1px solid var(--border);">
                 <div class="d-flex align-items-center gap-3">
-                    <div style="width:28px;height:28px;background:var(--primary-light);
-                                border-radius:50%;display:flex;align-items:center;
-                                justify-content:center;font-size:12px;font-weight:800;
+                    <div style="width:28px;height:28px;
+                                background:var(--primary-light);
+                                border-radius:50%;display:flex;
+                                align-items:center;justify-content:center;
+                                font-size:12px;font-weight:800;
                                 color:var(--primary);">
                         ${i + 1}
                     </div>
                     <div>
-                        <div style="font-size:13px;font-weight:700;">${job.title}</div>
-                        <div style="font-size:11px;color:var(--text-light);">
+                        <div style="font-size:13px;font-weight:700;">
+                            ${job.title}
+                        </div>
+                        <div style="font-size:11px;">
                             ${jobTypeBadge(job.job_type)}
                         </div>
                     </div>
                 </div>
                 <div class="text-end">
-                    <div style="font-size:16px;font-weight:800;color:var(--primary);">
+                    <div style="font-size:16px;font-weight:800;
+                                color:var(--primary);">
                         ${job.total_applications}
                     </div>
-                    <div style="font-size:11px;color:var(--text-light);">applicants</div>
+                    <div style="font-size:11px;color:var(--text-light);">
+                        applicants
+                    </div>
                 </div>
             </div>`).join("");
     }
 
 </script>
-<div class="wb-mobile-nav">
-    <a href="dashboard.html" class="active">
-        <i class="bi bi-grid"></i> Dashboard
-    </a>
-    <a href="jobs.html">
-        <i class="bi bi-briefcase"></i> Jobs
-    </a>
-    <a href="applications.html">
-        <i class="bi bi-file-text"></i> Applications
-    </a>
-    <a href="../index.html">
-        <i class="bi bi-eye"></i> View Site
-    </a>
-</div>
 </body>
 </html>

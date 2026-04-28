@@ -13,16 +13,50 @@ CREATE TABLE IF NOT EXISTS `users` (
     `name`       VARCHAR(100) NOT NULL,
     `email`      VARCHAR(150) NOT NULL UNIQUE,
     `password`   VARCHAR(255) NOT NULL,
-    `role`       ENUM('admin', 'candidate') NOT NULL DEFAULT 'candidate',
+    `role` ENUM('candidate','employer','company') NOT NULL DEFAULT 'candidate',
     `phone`      VARCHAR(20) DEFAULT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
+-- ─────────────────────────────────────────
+-- TABLE: employer_profiles
+-- Extra info for employers
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `employer_profiles` (
+    `id`           INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id`      INT(11) UNSIGNED NOT NULL UNIQUE,
+    `company_name` VARCHAR(150) NOT NULL,
+    `website`      VARCHAR(255) DEFAULT NULL,
+    `industry`     VARCHAR(100) DEFAULT NULL,
+    `description`  TEXT DEFAULT NULL,
+    `location`     VARCHAR(150) DEFAULT NULL,
+    `logo_path`    VARCHAR(255) DEFAULT NULL,
+    `status`       ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`   DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────
+-- TABLE: notifications
+-- System notifications for all users
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `notifications` (
+    `id`         INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id`    INT(11) UNSIGNED NOT NULL,
+    `title`      VARCHAR(255) NOT NULL,
+    `message`    TEXT NOT NULL,
+    `type`       ENUM('info','success','warning','danger') NOT NULL DEFAULT 'info',
+    `is_read`    TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- TABLE: jobs
 CREATE TABLE IF NOT EXISTS `jobs` (
     `id`           INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `admin_id`     INT(11) UNSIGNED NOT NULL,
+    `posted_by`    INT(11) UNSIGNED NOT NULL,
     `title`        VARCHAR(150) NOT NULL,
     `company`      VARCHAR(100) NOT NULL,
     `location`     VARCHAR(100) NOT NULL,
@@ -34,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `jobs` (
     `status`       ENUM('active','closed') NOT NULL DEFAULT 'active',
     `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`   DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (`admin_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`posted_by`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- TABLE: applications

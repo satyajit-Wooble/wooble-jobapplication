@@ -38,12 +38,15 @@ async function handleLogin(e) {
     showAlert("authAlert", "Login successful! Redirecting...", "success");
 
     setTimeout(() => {
-        if (Auth.isAdmin()) {
-            window.location.href = "admin/dashboard.html";
-        } else {
-            window.location.href = "candidate/dashboard.html";
-        }
-    }, 1000);
+    const user = Auth.getUser();
+    if (user.role === "company") {
+        window.location.href = "/frontend/company/dashboard.html";
+    } else if (user.role === "employer") {
+        window.location.href = "/frontend/employer/dashboard.html";
+    } else {
+        window.location.href = "/frontend/candidate/dashboard.html";
+    }
+}, 1000);
 }
 
 // ── Handle Register ────────────────────────
@@ -96,12 +99,15 @@ async function handleRegister(e) {
     showAlert("authAlert", "Account created! Redirecting...", "success");
 
     setTimeout(() => {
-        if (Auth.isAdmin()) {
-            window.location.href = "admin/dashboard.html";
-        } else {
-            window.location.href = "candidate/dashboard.html";
-        }
-    }, 1200);
+    const user = Auth.getUser();
+    if (user.role === "company") {
+        window.location.href = "/frontend/company/dashboard.html";
+    } else if (user.role === "employer") {
+        window.location.href = "/frontend/employer/dashboard.html";
+    } else {
+        window.location.href = "/frontend/candidate/dashboard.html";
+    }
+}, 1200);
 }
 
 // ── Toggle Password Visibility ─────────────
@@ -169,10 +175,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const isAuthPage = path.includes("login.html") || path.includes("register.html");
 
     if (isAuthPage && Auth.isLoggedIn()) {
-        if (Auth.isAdmin()) {
-            window.location.href = "admin/dashboard.html";
+        const user = Auth.getUser();
+        if (user.role === "company") {
+            window.location.href = "/frontend/company/dashboard.html";
+        } else if (user.role === "employer") {
+            window.location.href = "/frontend/employer/dashboard.html";
         } else {
-            window.location.href = "candidate/dashboard.html";
+            window.location.href = "/frontend/candidate/dashboard.html";
         }
     }
 });

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Auth Guard -->
+    <script>
+        (function() {
+            const token = localStorage.getItem("wooble_token");
+            const user  = JSON.parse(localStorage.getItem("wooble_user") || "null");
+            if (!token || !user || user.role !== "employer") {
+                localStorage.removeItem("wooble_token");
+                localStorage.removeItem("wooble_user");
+                window.location.replace("/frontend/login.html");
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="../wooble_image/images.jpg">
+    <title>Employer Dashboard || Wooble Jobs</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { background: var(--bg-light); }
+
+        .wb-sidebar {
+            background: var(--navy);
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav { padding: 12px 0; flex: 1; }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08);
+            color: var(--white);
+            border-right: 3px solid var(--accent);
+        }
+
+        .sidebar-nav a.active { font-weight: 700; }
+
+        .sidebar-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .wb-main { margin-left: 240px; min-height: 100vh; }
+
+        .wb-topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .company-badge {
+            background: var(--primary-light);
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius-pill);
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: box-shadow 0.2s;
+        }
+
+        .stat-card:hover { box-shadow: var(--shadow-md); }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .recent-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .recent-row:last-child { border-bottom: none; }
+
+        @media(max-width:768px) {
+            .wb-sidebar { display: none; }
+            .wb-main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════ -->
+<div class="wb-sidebar">
+    <div class="sidebar-brand">
+        <a href="../index.html" style="text-decoration:none;">
+            <span style="font-size:18px;font-weight:800;color:var(--white);">
+                💼 Wooble Jobs
+            </span>
+        </a>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">
+            Employer Panel
+        </div>
+    </div>
+
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" id="sidebarAvatar">E</div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:var(--white);"
+                     id="sidebarName">Loading...</div>
+                <div style="font-size:12px;color:#64748b;"
+                     id="sidebarCompany">Employer</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="dashboard.html" class="active">
+            <i class="bi bi-grid"></i> Dashboard
+        </a>
+        <a href="jobs.html">
+            <i class="bi bi-briefcase"></i> My Jobs
+        </a>
+        <a href="applications.html">
+            <i class="bi bi-file-text"></i> Applications
+        </a>
+        <a href="../index.html">
+            <i class="bi bi-eye"></i> View Site
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <button onclick="Auth.logout()"
+                style="background:rgba(255,255,255,0.08);
+                       border:1px solid rgba(255,255,255,0.15);
+                       color:#94a3b8;border-radius:var(--radius-pill);
+                       padding:9px 16px;font-size:13px;width:100%;
+                       cursor:pointer;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- ══ MAIN ══════════════════════════════════ -->
+<div class="wb-main">
+
+    <!-- Topbar -->
+    <div class="wb-topbar">
+        <div>
+            <h5 style="margin:0;font-weight:700;">Dashboard</h5>
+            <p class="text-muted mb-0" style="font-size:13px;">
+                Welcome back, <span id="topbarName"></span>!
+            </p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="company-badge" id="topbarCompany">🏢 Loading...</span>
+            <a href="jobs.html" class="btn-wb-primary"
+               style="font-size:13px;padding:9px 18px;">
+                <i class="bi bi-plus"></i> Post Job
+            </a>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:32px;">
+
+        <!-- Alert -->
+        <div id="pageAlert" class="wb-alert"></div>
+
+        <!-- Stats Row 1 -->
+        <!-- Stats Row 1 -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="wb-stat-card">
+            <div class="icon icon-blue">💼</div>
+            <div>
+                <div class="stat-number" id="statJobs">—</div>
+                <div class="stat-label">Total Jobs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wb-stat-card">
+            <div class="icon icon-green">✅</div>
+            <div>
+                <div class="stat-number" id="statActiveJobs">—</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wb-stat-card">
+            <div class="icon icon-yellow">📋</div>
+            <div>
+                <div class="stat-number" id="statApps">—</div>
+                <div class="stat-label">Applications</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wb-stat-card">
+            <div class="icon icon-purple">👥</div>
+            <div>
+                <div class="stat-number" id="statCandidates">—</div>
+                <div class="stat-label">Candidates</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Row 2 -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="wb-stat-card">
+            <div class="icon icon-yellow">🕐</div>
+            <div>
+                <div class="stat-number" id="statPending">—</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wb-stat-card">
+            <div class="icon icon-blue">⭐</div>
+            <div>
+                <div class="stat-number" id="statShortlisted">—</div>
+                <div class="stat-label">Shortlisted</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wb-stat-card">
+            <div class="icon icon-green">📅</div>
+            <div>
+                <div class="stat-number" id="statInvited">—</div>
+                <div class="stat-label">Invited</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wb-stat-card">
+            <div class="icon icon-red">❌</div>
+            <div>
+                <div class="stat-number" id="statRejected">—</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Bottom Row -->
+        <div class="row g-4">
+
+            <!-- Recent Applications -->
+            <div class="col-lg-7">
+                <div class="stat-card flex-column align-items-start">
+                    <div class="d-flex justify-content-between w-100 mb-3">
+                        <h6 style="font-weight:700;margin:0;">
+                            Recent Applications
+                        </h6>
+                        <a href="applications.html"
+                           style="font-size:13px;font-weight:600;">
+                            View All →
+                        </a>
+                    </div>
+                    <div id="recentApps" class="w-100">
+                        <div class="text-center py-4 text-muted">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Jobs -->
+            <div class="col-lg-5">
+                <div class="stat-card flex-column align-items-start">
+                    <div class="d-flex justify-content-between w-100 mb-3">
+                        <h6 style="font-weight:700;margin:0;">My Top Jobs</h6>
+                        <a href="jobs.html"
+                           style="font-size:13px;font-weight:600;">
+                            Manage →
+                        </a>
+                    </div>
+                    <div id="topJobs" class="w-100">
+                        <div class="text-center py-4 text-muted">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script>
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        if (!requireAuth("employer")) return;
+
+        const user = Auth.getUser();
+        if (user) {
+            document.getElementById("sidebarName").textContent   = user.name;
+            document.getElementById("sidebarAvatar").textContent = user.name.charAt(0).toUpperCase();
+            document.getElementById("topbarName").textContent    = user.name;
+        }
+
+        await loadDashboard();
+    });
+
+    async function loadDashboard() {
+    const { data } = await apiRequest("/admin/dashboard", "GET", null, true);
+
+    if (!data.success) {
+        showAlert("pageAlert", "Failed to load dashboard: " + data.message, "danger");
+        return;
+    }
+
+    const d = data.data;
+
+    // Set company name in topbar
+    const companyEl = document.getElementById("topbarCompany");
+    if (companyEl) companyEl.textContent = "🏢 " + Auth.getUser().name;
+
+        // Stats
+        document.getElementById("statJobs").textContent        = d.overview.total_jobs;
+        document.getElementById("statActiveJobs").textContent  = d.overview.active_jobs;
+        document.getElementById("statApps").textContent        = d.overview.total_applications;
+        document.getElementById("statCandidates").textContent  = d.overview.total_candidates;
+        document.getElementById("statPending").textContent     = d.application_stats.pending;
+        document.getElementById("statShortlisted").textContent = d.application_stats.shortlisted;
+        document.getElementById("statInvited").textContent     = d.application_stats.invited;
+        document.getElementById("statRejected").textContent    = d.application_stats.rejected;
+
+        // Recent Applications
+        renderRecentApps(d.recent_applications);
+
+        // Top Jobs
+        renderTopJobs(d.top_jobs);
+    }
+
+    function renderRecentApps(apps) {
+        if (!apps || apps.length === 0) {
+            document.getElementById("recentApps").innerHTML = `
+                <div class="wb-empty-state" style="padding:20px;">
+                    <div class="icon" style="font-size:32px;">📋</div>
+                    <h5 style="font-size:14px;">No applications yet</h5>
+                    <a href="jobs.html" class="btn-wb-primary mt-2"
+                       style="font-size:13px;padding:8px 16px;">
+                       Post a Job
+                    </a>
+                </div>`;
+            return;
+        }
+
+        document.getElementById("recentApps").innerHTML = apps.map(app => `
+            <div class="recent-row">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:36px;height:36px;background:var(--primary-light);
+                                border-radius:50%;display:flex;align-items:center;
+                                justify-content:center;font-weight:700;
+                                color:var(--primary);font-size:14px;">
+                        ${app.candidate_name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <div style="font-size:14px;font-weight:700;">
+                            ${app.candidate_name}
+                        </div>
+                        <div style="font-size:12px;color:var(--text-light);">
+                            ${app.job_title} · ${formatDate(app.applied_at)}
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    ${statusBadge(app.status)}
+                    <a href="applications.html"
+                       style="font-size:12px;color:var(--primary);font-weight:600;">
+                        Review →
+                    </a>
+                </div>
+            </div>`).join("");
+    }
+
+    function renderTopJobs(jobs) {
+        if (!jobs || jobs.length === 0) {
+            document.getElementById("topJobs").innerHTML = `
+                <div class="wb-empty-state" style="padding:20px;">
+                    <div class="icon" style="font-size:32px;">💼</div>
+                    <h5 style="font-size:14px;">No jobs posted yet</h5>
+                    <a href="jobs.html" class="btn-wb-primary mt-2"
+                       style="font-size:13px;padding:8px 16px;">
+                       Post a Job
+                    </a>
+                </div>`;
+            return;
+        }
+
+        document.getElementById("topJobs").innerHTML = jobs.map((job, i) => `
+            <div class="d-flex align-items-center justify-content-between py-3"
+                 style="border-bottom:1px solid var(--border);">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:28px;height:28px;background:var(--primary-light);
+                                border-radius:50%;display:flex;align-items:center;
+                                justify-content:center;font-size:12px;font-weight:800;
+                                color:var(--primary);">
+                        ${i + 1}
+                    </div>
+                    <div>
+                        <div style="font-size:13px;font-weight:700;">${job.title}</div>
+                        <div style="font-size:11px;">
+                            ${statusBadge(job.status)}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div style="font-size:16px;font-weight:800;color:var(--primary);">
+                        ${job.total_applications}
+                    </div>
+                    <div style="font-size:11px;color:var(--text-light);">
+                        applicants
+                    </div>
+                </div>
+            </div>`).join("");
+    }
+
+</script>
+</body>
+</html>

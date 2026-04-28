@@ -15,8 +15,8 @@ require_once __DIR__ . "/../config/database.php";
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../helpers/send_mail.php";
 
-// --- Admin only ---
-$admin = requireAdmin();
+// --- Employer or Company ---
+$user = requireEmployerOrCompany();
 
 $data           = json_decode(file_get_contents("php://input"), true);
 $application_id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
@@ -48,27 +48,48 @@ if (!in_array($status, $validStatuses)) {
 
 $db = (new Database())->getConnection();
 
-// --- Check application exists and belongs to admin's job ---
-$stmt = $db->prepare("
-    SELECT
-        a.id,
-        a.status        AS current_status,
-        a.candidate_id,
-        a.job_id,
-        u.name          AS candidate_name,
-        u.email         AS candidate_email,
-        j.title         AS job_title,
-        j.company
-    FROM applications a
-    JOIN jobs j ON a.job_id = j.id
-    JOIN users u ON a.candidate_id = u.id
-    WHERE a.id = :id AND j.admin_id = :admin_id
-    LIMIT 1
-");
-$stmt->execute([
-    ":id"       => $application_id,
-    ":admin_id" => $admin["user_id"]
-]);
+// --- Company sees all, Employer sees own only ---
+if ($user["role"] === "company") {
+    $stmt = $db->prepare("
+        SELECT
+            a.id,
+            a.status        AS current_status,
+            a.candidate_id,
+            a.job_id,
+            u.name          AS candidate_name,
+            u.email         AS candidate_email,
+            j.title         AS job_title,
+            j.company
+        FROM applications a
+        JOIN jobs j ON a.job_id = j.id
+        JOIN users u ON a.candidate_id = u.id
+        WHERE a.id = :id
+        LIMIT 1
+    ");
+    $stmt->execute([":id" => $application_id]);
+} else {
+    $stmt = $db->prepare("
+        SELECT
+            a.id,
+            a.status        AS current_status,
+            a.candidate_id,
+            a.job_id,
+            u.name          AS candidate_name,
+            u.email         AS candidate_email,
+            j.title         AS job_title,
+            j.company
+        FROM applications a
+        JOIN jobs j ON a.job_id = j.id
+        JOIN users u ON a.candidate_id = u.id
+        WHERE a.id = :id AND j.posted_by = :posted_by
+        LIMIT 1
+    ");
+    $stmt->execute([
+        ":id"        => $application_id,
+        ":posted_by" => $user["user_id"]
+    ]);
+}
+
 $application = $stmt->fetch();
 
 if (!$application) {
@@ -107,7 +128,6 @@ if ($status === "invited") {
         }
     }
 
-    // Check if invitation already exists
     $checkStmt = $db->prepare("
         SELECT id FROM invitations
         WHERE application_id = :application_id
@@ -116,7 +136,6 @@ if ($status === "invited") {
     $checkStmt->execute([":application_id" => $application_id]);
 
     if ($checkStmt->fetch()) {
-        // Update existing invitation
         $invStmt = $db->prepare("
             UPDATE invitations
             SET interview_date = :interview_date,
@@ -125,12 +144,11 @@ if ($status === "invited") {
             WHERE application_id = :application_id
         ");
         $invStmt->execute([
-            ":interview_date"  => $interview_date ?: null,
-            ":message"         => $message ?: null,
-            ":application_id"  => $application_id
+            ":interview_date" => $interview_date ?: null,
+            ":message"        => $message ?: null,
+            ":application_id" => $application_id
         ]);
     } else {
-        // Insert new invitation
         $invStmt = $db->prepare("
             INSERT INTO invitations
                 (application_id, candidate_id, job_id, interview_date, message, sent_at)
@@ -183,7 +201,6 @@ switch ($status) {
         break;
 }
 
-// --- Build response messages ---
 $messages = [
     "pending"     => "Application marked as pending",
     "shortlisted" => "Candidate has been shortlisted",

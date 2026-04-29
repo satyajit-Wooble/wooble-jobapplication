@@ -148,8 +148,71 @@
             .wb-sidebar { display: none; }
             .wb-main { margin-left: 0; }
         }
+        /* Mobile Bottom Nav */
+@media(max-width:768px) {
+    .wb-sidebar { display: none; }
+    .wb-main { margin-left: 0; }
+
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--white);
+        border-top: 1px solid var(--border);
+        z-index: 1000;
+        padding: 8px 0 12px;
+    }
+
+    .mobile-bottom-nav a {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+        color: var(--text-light);
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 0;
+    }
+
+    .mobile-bottom-nav a.active {
+        color: var(--primary);
+    }
+
+    .mobile-bottom-nav a i {
+        font-size: 22px;
+    }
+
+    .wb-main { padding-bottom: 70px; }
+}
+
+@media(min-width:769px) {
+    .mobile-bottom-nav { display: none; }
+}
     </style>
 </head>
+<!-- Mobile Bottom Nav -->
+<div class="mobile-bottom-nav">
+    <a href="dashboard.html" class="active">
+        <i class="bi bi-grid"></i>
+        Overview
+    </a>
+    <a href="jobs.html">
+        <i class="bi bi-briefcase"></i>
+        My Jobs
+    </a>
+    <a href="applications.html">
+        <i class="bi bi-file-text"></i>
+        Applications
+    </a>
+    <a href="../index.html">
+        <i class="bi bi-search"></i>
+        Jobs
+    </a>
+</div>
 <body>
 
 <!-- ══ SIDEBAR ══════════════════════════════ -->
